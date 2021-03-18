@@ -40,24 +40,25 @@ class DiscriminatorBlock(nn.Module):
         return (x + res)  / sqrt(2)
 
 class Discriminator(nn.Module):
-    def __init__(self, num_outcomes, filters, act_name='Swish',
-          use_adaptive_reparam=True, use_spectral_norm=False):
+    def __init__(self, opt):  
         super().__init__()
-        self.use_adaptive_reparam = use_adaptive_reparam
-        self.num_outcomes = num_outcomes        
-        chan_in_out = make_chan_in_out(filters)
+        self.use_adaptive_reparam = opt.D_use_adaptive_reparam
+        self.num_outcomes = opt.D_num_outcomes
+        self.filters =  opt.D_filters
+            
+        chan_in_out = make_chan_in_out(self.filters)
         layers = OrderedDict([])
-        act = activations[act_name]
+        act = activations[opt.D_act_name]
         for i, (in_chan, out_chan) in enumerate(chan_in_out):            
             is_not_last = i != (len(chan_in_out) - 1)
             layers['b'+str(i)] = DiscriminatorBlock(in_chan, out_chan, act,  
-                use_spectral_norm, downsample=is_not_last)
+                opt.D_use_spectral_norm, downsample=is_not_last)
         layers['avgpool'] = nn.AdaptiveAvgPool2d((1, 1))
         layers['flatten'] = nn.Flatten()
         self.model = nn.Sequential(layers)                
-        self.fc = nn.Linear(filters[-1], num_outcomes)        
+        self.fc = nn.Linear(self.filters[-1], self.num_outcomes)        
         # resampling trick
-        self.reparam = nn.Linear(filters[-1], num_outcomes * 2, bias=False)
+        self.reparam = nn.Linear(self.filters[-1], self.num_outcomes * 2, bias=False)
         
     def forward(self, x):        
         y = self.model(x)

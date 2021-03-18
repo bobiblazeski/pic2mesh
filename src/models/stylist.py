@@ -33,11 +33,13 @@ def make_layers(cfg, batch_norm=False):
 
 
 class Stylist(nn.Module):
-    def __init__(self, backbone='vgg11', output_k=128):
+    def __init__(self, opt):
+        self.backbone= opt.backbone
+        self.output_k= opt.dlatent_size
         super(Stylist, self).__init__()
         # network layers setting
-        self.features = make_layers(cfg[backbone], True)        
-        self.cont = nn.Linear(512, output_k)
+        self.features = make_layers(cfg[self.backbone], True)        
+        self.cont = nn.Linear(512, self.output_k)
 
         self._initialize_weights()
 

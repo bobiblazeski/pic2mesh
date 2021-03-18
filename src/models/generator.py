@@ -33,7 +33,7 @@ class Generator(nn.Module):
             opt.dlatent_size, 
             opt.in_channel,
             opt.out_channel, 
-            opt.kernel, 
+            opt.ker_size, 
         )
         self.body = nn.Sequential()
         for i in range(opt.num_layer-2):
