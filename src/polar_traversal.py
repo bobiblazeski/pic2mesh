@@ -17,6 +17,11 @@ def scale_mesh(stl_path, offset=0.02):
     vertices = vertices / vertices.abs().max() * (1.-offset)        
     return trimesh.Trimesh(vertices=vertices, faces=mesh.faces)
 
+def flip_mesh(mesh):
+    vertices = np.array(mesh.vertices)
+    switched = np.vstack([vertices[:, 1], vertices[:, 2],  vertices[:, 0]]).transpose()
+    return trimesh.Trimesh(vertices=switched, faces=np.array(mesh.faces))
+
 def get_start(mesh):
     ray_origins = np.array([[0, 0, 2],])
     ray_directions = np.array([[0, 0, -1]])
@@ -35,7 +40,7 @@ class Bridge:
 
     def __init__(self, path):
         self.path = path
-        self.mesh = scale_mesh(path)
+        self.mesh = flip_mesh(scale_mesh(path))
         self.mesh.fix_normals()
         self.faces = self.make_faces()
         self.polars = math.pi + np.array(
