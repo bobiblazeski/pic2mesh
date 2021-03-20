@@ -8,6 +8,27 @@ from distutils.util import strtobool
 def get_parser():
     parser = argparse.ArgumentParser()
     
+    # Renderer    
+    parser.add_argument('--viewpoint_distance', type=float, default=2.0, 
+                        help='Distance from camera to the object')
+    parser.add_argument('--viewpoint_elevation', type=float, default=0.0, 
+                        help='Angle of elevation in degrees')
+    parser.add_argument('--viewpoint_azimuth', type=float, default=0.0, 
+                        help='No rotation so the camera is positioned on the +Z axis')
+    parser.add_argument('--lights_location', nargs='+', type=float, 
+                        default=[0.0, -1.0, 3.0],
+                        help="Examples: -lights_location 0.0, -1.0, 3.0")
+
+    parser.add_argument('--raster_image_size', type=int, default=512, 
+                        help='Rasterizer image size')
+    parser.add_argument('--raster_radius', type=float, default=0.006, 
+                        help='Points radius')
+    parser.add_argument('--raster_points_per_pixel', type=int, default=4)                        
+    
+
+
+
+
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 
                         default=32)    
@@ -29,6 +50,8 @@ def get_parser():
     parser.add_argument('--dlatent_size', type=int, default=128)
     parser.add_argument('--in_channel', type=int, default=3)
     parser.add_argument('--out_channel',type=int,help='kernel size',default=32)
+
+    parser.add_argument('--blueprint', default='./data/blueprint.pt')
     
     
     #networks hyper parameters:
