@@ -117,9 +117,7 @@ def get_intersection_point(latitude, edge_vertex, edge_vertex_normals):
         normal =  ratio * edge_vertex_normals[0] + (1-ratio) *  edge_vertex_normals[1]
         point, normal =  np.array(xyz), np.array(normal)
         assert point.shape == normal.shape, (edge_vertex, edge_vertex_normals)
-        return point, normal
-        
-        
+        return point, normal        
     return None, None
    
 def it_intersects(edge, latitude, bridge):
