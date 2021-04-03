@@ -19,15 +19,11 @@ def get_parser():
                         default=[0.0, -1.0, 3.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
-    parser.add_argument('--raster_image_size', type=int, default=512, 
+    parser.add_argument('--raster_image_size', type=int, default=128, 
                         help='Rasterizer image size')
     parser.add_argument('--raster_radius', type=float, default=0.006, 
                         help='Points radius')
-    parser.add_argument('--raster_points_per_pixel', type=int, default=4)                        
-    
-
-
-
+    parser.add_argument('--raster_points_per_pixel', type=int, default=4)
 
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 
@@ -92,5 +88,15 @@ def get_parser():
     parser.add_argument('--lambda_grad',type=float, help='gradient penelty weight',default=0.1)
     parser.add_argument('--alpha',type=float, help='reconstruction loss weight',default=10)
 
-    
+    # data module
+    parser.add_argument('--data_blueprint', help='Blueprint file', default='./data/blueprint127.npz')
+    parser.add_argument('--data_image_dir', help='Images directory', 
+                        default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
+    parser.add_argument('--data_mask_dir', help='Blueprint file', 
+                        default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
+    parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
+    parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
+    parser.add_argument('--data_image_resized', help='Mask size', type=int, default=256)
+    parser.add_argument('--data_patch_size', help='Blueprint file', type=int, default=128)
+
     return parser
