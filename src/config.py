@@ -51,7 +51,7 @@ def get_parser():
     parser.add_argument('--in_channel', type=int, default=3)
     parser.add_argument('--out_channel',type=int,help='kernel size',default=32)
 
-    parser.add_argument('--blueprint', default='./data/blueprint.pt')
+    parser.add_argument('--blueprint', default='./data/blueprint127.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.003)
     
     
