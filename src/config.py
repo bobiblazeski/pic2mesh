@@ -2,9 +2,6 @@ import argparse
 
 from distutils.util import strtobool
 
-
-
-
 def get_parser():
     parser = argparse.ArgumentParser()
     
@@ -44,12 +41,13 @@ def get_parser():
     
     # Generator
     parser.add_argument('--dlatent_size', type=int, default=128)
-    parser.add_argument('--in_channel', type=int, default=3)
+    parser.add_argument('--in_channel', type=int, default=6) # 3 just points, 6 normals too
     parser.add_argument('--out_channel',type=int,help='kernel size',default=32)
 
     parser.add_argument('--blueprint', default='./data/blueprint127.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.003)
-    
+    parser.add_argument('--G_use_adaptive_reparam', dest='G_use_adaptive_reparam', 
+                        default=True, type=lambda x: bool(strtobool(x)))
     
     #networks hyper parameters:
     parser.add_argument('--nfc', type=int, default=32)

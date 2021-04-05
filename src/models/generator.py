@@ -55,7 +55,7 @@ class Generator(nn.Module):
     def forward(self, points, normals, style):
         #vertices = self.vertices.expand(style.size(0), -1, -1, -1)
         noise = torch.randn_like(points) * self.noise_amp                
-        x = torch.stack((vertices + noise, normals), dim=1)
+        x = torch.cat((points + noise, normals), dim=1)
         x = self.head(x, style)        
         x = self.body(x)        
         x = self.tail(x)        
