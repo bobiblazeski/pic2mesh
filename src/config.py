@@ -91,12 +91,17 @@ def get_parser():
     # data module
     parser.add_argument('--data_blueprint', help='Blueprint file', default='./data/blueprint127.npz')
     parser.add_argument('--data_image_dir', help='Images directory', 
-                        default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
-    parser.add_argument('--data_mask_dir', help='Blueprint file', 
                         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
+    parser.add_argument('--data_mask_dir', help='Blueprint file', 
+                        default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
-    parser.add_argument('--data_image_resized', help='Mask size', type=int, default=256)
-    parser.add_argument('--data_patch_size', help='Blueprint file', type=int, default=128)
+    parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)
+    parser.add_argument('--data_patch_size', help='Patch size', type=int, default=128)
+    parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
+
+    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--num_workers', type=int, default=4)
+    
 
     return parser

@@ -30,9 +30,9 @@ class Generator(nn.Module):
     def __init__(self, opt):
         super(Generator, self).__init__()
         self.noise_amp = opt.G_noise_amp
-        blueprint = torch.load(opt.blueprint)
-        self.register_buffer('vertices', blueprint['vertices'])
-        self.register_buffer('normals', blueprint['normals'])
+        # blueprint = torch.load(opt.blueprint)
+        # self.register_buffer('vertices', blueprint['vertices'])
+        # self.register_buffer('normals', blueprint['normals'])
         
 
         self.head = ModConvLayer(
@@ -52,10 +52,10 @@ class Generator(nn.Module):
             nn.Tanh()
         )
     
-    def forward(self, style):
-        vertices = self.vertices.expand(style.size(0), -1, -1, -1)
-        noise = torch.randn_like(vertices) * self.noise_amp
-        x = vertices + noise        
+    def forward(self, points, normals, style):
+        #vertices = self.vertices.expand(style.size(0), -1, -1, -1)
+        noise = torch.randn_like(points) * self.noise_amp                
+        x = torch.stack((vertices + noise, normals), dim=1)
         x = self.head(x, style)        
         x = self.body(x)        
         x = self.tail(x)        
