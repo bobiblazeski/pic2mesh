@@ -5,6 +5,9 @@ from distutils.util import strtobool
 def get_parser():
     parser = argparse.ArgumentParser()
     
+    # General
+    parser.add_argument('--data_dir', help='Tensor storage',default='./data/')
+
     # Renderer    
     parser.add_argument('--viewpoint_distance', type=float, default=2.0, 
                         help='Distance from camera to the object')
@@ -21,6 +24,9 @@ def get_parser():
     parser.add_argument('--raster_radius', type=float, default=0.006, 
                         help='Points radius')
     parser.add_argument('--raster_points_per_pixel', type=int, default=4)
+    parser.add_argument('--raster_patch_size', type=int, default=256)
+    parser.add_argument('--raster_max_brightness', type=float, default=0.7, 
+                        help='Maximum brightness of pixel, [0-1]')
 
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 
@@ -44,7 +50,7 @@ def get_parser():
     parser.add_argument('--in_channel', type=int, default=6) # 3 just points, 6 normals too
     parser.add_argument('--out_channel',type=int,help='kernel size',default=32)
 
-    parser.add_argument('--blueprint', default='./data/blueprint127.npz')
+    parser.add_argument('--blueprint', default='blueprint127.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.003)
     parser.add_argument('--G_use_adaptive_reparam', dest='G_use_adaptive_reparam', 
                         default=True, type=lambda x: bool(strtobool(x)))
@@ -90,7 +96,7 @@ def get_parser():
     parser.add_argument('--data_blueprint', help='Blueprint file', default='./data/blueprint127.npz')
     parser.add_argument('--data_image_dir', help='Images directory', 
                         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
-    parser.add_argument('--data_mask_dir', help='Blueprint file', 
+    parser.add_argument('--data_mask_dir', help='Image masks directory', 
                         default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
@@ -98,7 +104,7 @@ def get_parser():
     parser.add_argument('--data_patch_size', help='Patch size', type=int, default=128)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
-    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--num_workers', type=int, default=4)
     
 

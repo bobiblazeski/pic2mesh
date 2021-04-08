@@ -41,7 +41,7 @@ class MaskedDataset(torch.utils.data.Dataset):
         }
         
         
-        blueprint =  np.load(config.blueprint)        
+        blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
         self.points = torch.tensor(blueprint['points'])[0]
         self.normals = torch.tensor(blueprint['normals'])[0]
         
