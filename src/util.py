@@ -310,3 +310,25 @@ class Lambda(torch.nn.Module):
         self.func=func
 
     def forward(self, x): return self.func(x)
+
+def vertex_tris(faces):
+    res = []
+    for vid in range(faces.max()+1):
+        vertex_faces = []
+        for fid, face in enumerate(faces):
+            if vid in face:
+                vertex_faces.append(fid)
+        res.append(vertex_faces)
+    return res
+
+def vertex_tri_maps(faces):
+    vts = vertex_tris(faces)
+    r, c = len(vts), max([len(x) for  x in vts])
+    vert_tri_indices = torch.zeros(r, c, dtype=torch.long)
+    vert_tri_weights = torch.zeros(r, c)    
+    for r, tris in enumerate(vts):
+        weight = 1. / len(tris)
+        for c, tri_id in enumerate(tris):
+            vert_tri_indices[r, c] = tri_id
+            vert_tri_weights[r, c] = weight
+    return vert_tri_indices, vert_tri_weights.unsqueeze(dim=-1)[None]    

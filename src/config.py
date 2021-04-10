@@ -9,22 +9,22 @@ def get_parser():
     parser.add_argument('--data_dir', help='Tensor storage',default='./data/')
 
     # Renderer    
-    parser.add_argument('--viewpoint_distance', type=float, default=2.0, 
+    parser.add_argument('--viewpoint_distance', type=float, default=1.25, 
                         help='Distance from camera to the object')
     parser.add_argument('--viewpoint_elevation', type=float, default=0.0, 
                         help='Angle of elevation in degrees')
     parser.add_argument('--viewpoint_azimuth', type=float, default=0.0, 
                         help='No rotation so the camera is positioned on the +Z axis')
     parser.add_argument('--lights_location', nargs='+', type=float, 
-                        default=[0.0, -1.0, 3.0],
+                        default=[0.0, -1.0, 2.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
-    parser.add_argument('--raster_image_size', type=int, default=128, 
+    parser.add_argument('--raster_image_size', type=int, default=512, 
                         help='Rasterizer image size')
-    parser.add_argument('--raster_radius', type=float, default=0.006, 
+    parser.add_argument('--raster_radius', type=float, default=0.01, 
                         help='Points radius')
     parser.add_argument('--raster_points_per_pixel', type=int, default=4)
-    parser.add_argument('--raster_patch_size', type=int, default=256)
+    parser.add_argument('--raster_patch_size', type=int, default=1000)
     parser.add_argument('--raster_max_brightness', type=float, default=0.7, 
                         help='Maximum brightness of pixel, [0-1]')
 
@@ -101,7 +101,7 @@ def get_parser():
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
     parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)
-    parser.add_argument('--data_patch_size', help='Patch size', type=int, default=128)
+    parser.add_argument('--data_patch_size', help='Patch size', type=int, default=256)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
     parser.add_argument('--batch_size', type=int, default=4)
