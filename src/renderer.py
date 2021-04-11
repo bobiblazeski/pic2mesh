@@ -26,13 +26,13 @@ class Renderer(torch.nn.Module):
         self.max_brightness = opt.raster_max_brightness        
         trimap =  torch.load(os.path.join(opt.data_dir, 
             'trimap_{}.pth'.format(opt.raster_patch_size)))        
-        self.register_buffer('faces',  trimap['faces'][0])
+        self.register_buffer('faces',  trimap['faces'])
         self.register_buffer('vert_tri_indices', trimap['vert_tri_indices'])
         self.register_buffer('vert_tri_weights', trimap['vert_tri_weights'])
+        self.renderer = None
     
-    def to(self, device):
-        new_self = super(Renderer, self).to(device)
-        
+    def setup(self, device):
+        if  self.renderer is not None: return              
         R, T = look_at_view_transform(
             self.opt.viewpoint_distance, 
             self.opt.viewpoint_elevation, 
@@ -56,11 +56,10 @@ class Renderer(torch.nn.Module):
             cameras=cameras,
             lights=lights
         )        
-        new_self.renderer = ShadingPointsRenderer(
+        self.renderer = ShadingPointsRenderer(
             rasterizer=rasterizer,
             compositor=compositor,
-        ) 
-        return new_self
+        )
     
     def get_face_normals(self, vrt):
         faces = self.faces

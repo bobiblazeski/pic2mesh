@@ -24,7 +24,7 @@ def get_parser():
     parser.add_argument('--raster_radius', type=float, default=0.01, 
                         help='Points radius')
     parser.add_argument('--raster_points_per_pixel', type=int, default=4)
-    parser.add_argument('--raster_patch_size', type=int, default=1000)
+    parser.add_argument('--raster_patch_size', type=int, default=512)
     parser.add_argument('--raster_max_brightness', type=float, default=0.7, 
                         help='Maximum brightness of pixel, [0-1]')
 

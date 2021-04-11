@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import torch
+import torch.nn.functional as F
 import torchvision.transforms as transforms
 
 from random import randint
@@ -9,6 +10,7 @@ from PIL import Image
 class MaskedDataset(torch.utils.data.Dataset):
     def __init__(self, config):
         self.patch_size = config.data_patch_size
+        self.raster_patch_size = config.raster_patch_size
         self.img_dir = config.data_image_dir
         self.mask_dir = config.data_mask_dir        
         images =  set([x.replace('.png', '') for x 
@@ -63,6 +65,11 @@ class MaskedDataset(torch.utils.data.Dataset):
         h = randint(0, self.hmax - self.patch_size)          
         points = self.points[:, w:w + self.patch_size, h:h + self.patch_size]
         normals = self.normals[:, w:w + self.patch_size, h:h + self.patch_size]
+        
+        points = F.interpolate(points[None], size=self.raster_patch_size,
+                               mode='bicubic', align_corners=True).squeeze()
+        normals = F.normalize(F.interpolate(normals[None], size=self.raster_patch_size, 
+                                            mode='bicubic', align_corners=True)).squeeze()
         
         return {
             'style_img': style_img,
