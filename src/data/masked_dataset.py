@@ -24,7 +24,8 @@ class MaskedDataset(torch.utils.data.Dataset):
         self.transform = {    
             "image_normed": transforms.Compose([
                 transforms.ToTensor(),
-                transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                #transforms.Resize(config.data_image_size),
+                transforms.Normalize(config.image_mean, config.image_std),
                 transforms.Grayscale(),
             ]),
             "mask": transforms.Lambda(lambda x: 
@@ -36,14 +37,13 @@ class MaskedDataset(torch.utils.data.Dataset):
             "img_patch": transforms.Compose([
                 transforms.Resize(config.data_image_resized),
                 transforms.RandomCrop(config.data_patch_size),
-            ]),
-            
-        }
-        
-        
+            ]),            
+        }        
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
         self.points = torch.tensor(blueprint['points'])[0]
-        self.normals = torch.tensor(blueprint['normals'])[0]
+        self.normals = torch.tensor(blueprint['normals'])[0]        
+        self.wmax = self.points.size(1)
+        self.hmax = self.points.size(2)        
         
     def __len__(self):
         return len(self.entries)
@@ -58,10 +58,11 @@ class MaskedDataset(torch.utils.data.Dataset):
         res_masked =  img_normed * mask_resized
         style_img = self.transform['style_img'](res_masked)
         img_patch = self.transform['img_patch'](res_masked)
-        patch_size = self.patch_size
-        w, h = randint(0, patch_size), randint(0, patch_size)
-        points = self.points[:, w:w + patch_size, h:h + patch_size]
-        normals = self.normals[:, w:w + patch_size, h:h + patch_size]
+                
+        w = randint(0, self.wmax - self.patch_size)
+        h = randint(0, self.hmax - self.patch_size)          
+        points = self.points[:, w:w + self.patch_size, h:h + self.patch_size]
+        normals = self.normals[:, w:w + self.patch_size, h:h + self.patch_size]
         
         return {
             'style_img': style_img,

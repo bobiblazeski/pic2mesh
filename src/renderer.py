@@ -91,9 +91,14 @@ class Renderer(torch.nn.Module):
             normals = self.get_vertex_normals(points)
                 
         if translate:
-            T = T3.Translate(-points.mean(dim=-2, keepdim=False)).to(points.device)
+            tm = points.mean(dim=-2, keepdim=False)
+            T = T3.Translate(-tm, device=points.device)
+            # print('points.shape, normals.shape, tm.shape', 
+            #       points.shape, normals.shape, tm.shape)
             points = T.transform_points(points)
-            normals = T.transform_normals(normals)
+            # There's error on normals
+            # Probably not needed on just translation
+            #normals = T.transform_normals(normals)
 
         point_cloud = Pointclouds(points=points, 
                           normals=normals,

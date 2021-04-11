@@ -87,15 +87,16 @@ def get_parser():
     parser.add_argument('--lr_g', type=float, default=0.0005, help='learning rate, default=0.0005')
     parser.add_argument('--lr_d', type=float, default=0.0005, help='learning rate, default=0.0005')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
+    parser.add_argument('--beta2', type=float, default=0.999, help='beta2 for adam. default=0.999')    
     parser.add_argument('--Gsteps',type=int, help='Generator inner steps',default=3)
     parser.add_argument('--Dsteps',type=int, help='Discriminator inner steps',default=3)
-    parser.add_argument('--lambda_grad',type=float, help='gradient penelty weight',default=0.1)
+    parser.add_argument('--lambda_grad',type=float, help='gradient penalty weight',default=0.1)
     parser.add_argument('--alpha',type=float, help='reconstruction loss weight',default=10)
 
     # data module
     parser.add_argument('--data_blueprint', help='Blueprint file', default='./data/blueprint127.npz')
     parser.add_argument('--data_image_dir', help='Images directory', 
-                        default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
+                        default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024/')
     parser.add_argument('--data_mask_dir', help='Image masks directory', 
                         default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
@@ -106,6 +107,13 @@ def get_parser():
 
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--num_workers', type=int, default=4)
+
+    parser.add_argument('--image_mean', nargs='+', type=float, 
+                        default=[0.485, 0.456, 0.406],
+                        help="Examples: -image_mean 0.485 0.456 0.406")
+    parser.add_argument('--image_std', nargs='+', type=float, 
+                        default=[0.229, 0.224, 0.225],
+                        help="Examples: -image_std 0.229 0.224 0.225")
     
 
     return parser
