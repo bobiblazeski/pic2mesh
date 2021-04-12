@@ -41,14 +41,16 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--D_use_spectral_norm', dest='D_use_spectral_norm', 
                         default=False, type=lambda x: bool(strtobool(x)))
+    parser.add_argument('--D_in_ch', type=int, help='Discriminator input channels: 3 RGB, 1 Greyscale', default=3)
+    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=128)
     
     # Stylist
     parser.add_argument('--backbone', default='vgg11')
     
     # Generator
     parser.add_argument('--dlatent_size', type=int, default=128)
-    parser.add_argument('--G_in_ch', type=int, default=6) # 3 just points, 6 normals too
-    parser.add_argument('--G_out_ch',type=int,help='kernel size',default=128)
+    parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=6) # 3 just points, 6 normals too
+    parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=128)  
 
     parser.add_argument('--blueprint', default='blueprint127.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.003)
