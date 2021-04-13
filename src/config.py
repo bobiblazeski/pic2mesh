@@ -45,7 +45,7 @@ def get_parser():
     parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=128)
     
     # Stylist
-    parser.add_argument('--backbone', default='vgg11')
+    parser.add_argument('--backbone', default='vgg9')
     
     # Generator
     parser.add_argument('--dlatent_size', type=int, default=128)
