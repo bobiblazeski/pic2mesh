@@ -30,7 +30,7 @@ def get_parser():
 
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 
-                        default=32)    
+                        default=1)    
     parser.add_argument('--D_filters', nargs='+', type=int, 
                         default=[3, 128, 128, 128],
                         help="Examples: -D_filters 3 32 64")
