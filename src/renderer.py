@@ -25,7 +25,7 @@ class Renderer(torch.nn.Module):
         self.opt = opt
         self.max_brightness = opt.raster_max_brightness        
         trimap =  torch.load(os.path.join(opt.data_dir, 
-            'trimap_{}.pth'.format(opt.raster_patch_size)))        
+            'trimap_{}.pth'.format(opt.data_patch_size)))        
         self.register_buffer('faces',  trimap['faces'])
         self.register_buffer('vert_tri_indices', trimap['vert_tri_indices'])
         self.register_buffer('vert_tri_weights', trimap['vert_tri_weights'])

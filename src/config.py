@@ -49,7 +49,7 @@ def get_parser():
     
     # Generator
     parser.add_argument('--dlatent_size', type=int, default=128)
-    parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=6) # 3 just points, 6 normals too
+    parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
     parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=128)  
 
     parser.add_argument('--blueprint', default='blueprint127.npz')
@@ -105,6 +105,7 @@ def get_parser():
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
     parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)
     parser.add_argument('--data_patch_size', help='Patch size', type=int, default=256)
+    parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
     parser.add_argument('--batch_size', type=int, default=4)

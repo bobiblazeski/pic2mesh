@@ -31,21 +31,26 @@ class MaskedDataset(torch.utils.data.Dataset):
                 transforms.Grayscale(),
             ]),
             "mask": transforms.Lambda(lambda x: 
-                torch.nn.functional.interpolate(x.float(), size=config.data_image_size, 
-                                                mode='nearest').squeeze(0)),
-            "style_img": transforms.Compose([
-                transforms.Resize(config.data_style_img),
-            ]),
+                torch.nn.functional.interpolate(x.float(),
+                    size=config.data_image_size, mode='nearest').squeeze(0)),            
             "img_patch": transforms.Compose([
                 transforms.Resize(config.data_image_resized),
                 transforms.RandomCrop(config.data_patch_size),
             ]),            
         }        
-        blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
-        self.points = torch.tensor(blueprint['points'])[0]
-        self.normals = torch.tensor(blueprint['normals'])[0]        
-        self.wmax = self.points.size(1)
-        self.hmax = self.points.size(2)        
+        blueprint = np.load(os.path.join(config.data_dir, config.blueprint))        
+        points = torch.tensor(blueprint['points'])
+        normals = torch.tensor(blueprint['normals'])
+        assert len(points.shape) == 4 and len(normals.shape) == 4
+        points = F.interpolate(points, size=config.data_blueprint_size,
+                               mode='bicubic', align_corners=True)
+        normals = F.interpolate(normals, size=config.data_blueprint_size, 
+                                mode='bicubic', align_corners=True)        
+        normals = F.normalize(normals)        
+        self.points = points[0]
+        self.normals = normals[0]        
+        self.wmax = self.points.size(-1)
+        self.hmax = self.points.size(-2)
         
     def __len__(self):
         return len(self.entries)
@@ -57,8 +62,7 @@ class MaskedDataset(torch.utils.data.Dataset):
 
         img_normed  = self.transform['image_normed'](img)
         mask_resized = self.transform['mask'](mask)
-        res_masked =  img_normed * mask_resized
-        style_img = self.transform['style_img'](res_masked)
+        res_masked =  img_normed * mask_resized        
         img_patch = self.transform['img_patch'](res_masked)
                 
         w = randint(0, self.wmax - self.patch_size)
@@ -66,13 +70,7 @@ class MaskedDataset(torch.utils.data.Dataset):
         points = self.points[:, w:w + self.patch_size, h:h + self.patch_size]
         normals = self.normals[:, w:w + self.patch_size, h:h + self.patch_size]
         
-        points = F.interpolate(points[None], size=self.raster_patch_size,
-                               mode='bicubic', align_corners=True).squeeze()
-        normals = F.normalize(F.interpolate(normals[None], size=self.raster_patch_size, 
-                                            mode='bicubic', align_corners=True)).squeeze()
-        
-        return {
-            'style_img': style_img,
+        return {            
             'img_patch': img_patch,
             'points': points,
             'normals': normals,
