@@ -19,7 +19,7 @@ def get_parser():
                         default=[0.0, -1.0, 2.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
-    parser.add_argument('--raster_image_size', type=int, default=512, 
+    parser.add_argument('--raster_image_size', type=int, default=128,
                         help='Rasterizer image size')
     parser.add_argument('--raster_radius', type=float, default=0.01, 
                         help='Points radius')
@@ -30,19 +30,13 @@ def get_parser():
 
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 
-                        default=1)    
-    parser.add_argument('--D_filters', nargs='+', type=int, 
-                        default=[3, 128, 128, 128],
-                        help="Examples: -D_filters 3 32 64")
-    parser.add_argument('--D_act_name', 
-                        help='Discriminator activation name Swish or LeakyReLU',
-                        default='Swish')
+                        default=1)            
     parser.add_argument('--D_use_adaptive_reparam', dest='D_use_adaptive_reparam', 
                         default=True, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--D_use_spectral_norm', dest='D_use_spectral_norm', 
                         default=False, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--D_in_ch', type=int, help='Discriminator input channels: 3 RGB, 1 Greyscale', default=3)
-    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=128)
+    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)
     
     # Stylist
     parser.add_argument('--backbone', default='vgg9')
@@ -50,7 +44,7 @@ def get_parser():
     # Generator
     parser.add_argument('--dlatent_size', type=int, default=128)
     parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
-    parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=128)  
+    parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=256)
 
     parser.add_argument('--blueprint', default='blueprint127.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.003)
@@ -108,7 +102,7 @@ def get_parser():
     parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--num_workers', type=int, default=4)
 
     parser.add_argument('--image_mean', nargs='+', type=float, 
