@@ -54,7 +54,8 @@ class LogExportCallback(pl.callbacks.Callback):
             pl_module.eval()
             vertices = pl_module.G(points) 
             images1 = pl_module.R(vertices).permute(0, 3, 1, 2)
-            images2 = pl_module.R(points, normals=normals).permute(0, 3, 1, 2)
+            images2 = pl_module.R(points).permute(0, 3, 1, 2)
+            images3 = pl_module.R(points, normals=normals).permute(0, 3, 1, 2)
             images = torch.cat((images1, images2))
             pl_module.train()
 

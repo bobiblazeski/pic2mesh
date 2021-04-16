@@ -19,7 +19,7 @@ def get_parser():
                         default=[0.0, -1.0, 2.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
-    parser.add_argument('--raster_image_size', type=int, default=128,
+    parser.add_argument('--raster_image_size', type=int, default=256,
                         help='Rasterizer image size')
     parser.add_argument('--raster_radius', type=float, default=0.01, 
                         help='Points radius')
@@ -102,7 +102,7 @@ def get_parser():
     parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
-    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--num_workers', type=int, default=4)
 
     parser.add_argument('--image_mean', nargs='+', type=float, 
@@ -113,12 +113,12 @@ def get_parser():
                         help="Examples: -image_std 0.229 0.224 0.225")
     
     # Logger
-    parser.add_argument('--log_grid_samples', help='Log image grid number of samples', type=int, default=16)
+    parser.add_argument('--log_grid_samples', help='Log image grid number of samples', type=int, default=8)
     parser.add_argument('--log_grid_rows', help='Log image grid number of rows', type=int, default=4)
     parser.add_argument('--log_grid_padding', help='Log image grid number padding', type=int, default=2)
     parser.add_argument('--log_scale_each', dest='Scale each image from the grid', 
                             default=False, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--log_pad_value', help='Value for the padded pixels', type=int, default=0)
-    parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=100)
+    parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=10)
 
     return parser
