@@ -7,12 +7,16 @@ import torchvision.transforms as transforms
 from random import randint
 from PIL import Image
 
+from src.util import make_faces
+
 class MaskedDataset(torch.utils.data.Dataset):
     def __init__(self, config):
         self.patch_size = config.data_patch_size
-        self.raster_patch_size = config.raster_patch_size
+        self.raster_patch_size = config.raster_patch_size        
         self.img_dir = config.data_image_dir
-        self.mask_dir = config.data_mask_dir        
+        self.mask_dir = config.data_mask_dir
+
+        self.faces = torch.tensor(make_faces(self.patch_size, self.patch_size))
         images =  set([x.replace('.png', '') for x 
                        in os.listdir(self.img_dir) if x.endswith('.png')])        
         
@@ -46,7 +50,7 @@ class MaskedDataset(torch.utils.data.Dataset):
                                mode='bicubic', align_corners=True)
         normals = F.interpolate(normals, size=config.data_blueprint_size, 
                                 mode='bicubic', align_corners=True)        
-        normals = F.normalize(normals)        
+        normals = F.normalize(normals)     
         self.points = points[0]
         self.normals = normals[0]        
         self.wmax = self.points.size(-1)
@@ -74,4 +78,5 @@ class MaskedDataset(torch.utils.data.Dataset):
             'img_patch': img_patch,
             'points': points,
             'normals': normals,
+            'faces': self.faces,
         }

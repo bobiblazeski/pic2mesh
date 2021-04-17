@@ -73,7 +73,7 @@ def get_parser():
         
     #pyramid parameters:
     parser.add_argument('--scale_factor',type=float,help='pyramid scale factor',default=0.75)#pow(0.5,1/6))
-    parser.add_argument('--noise_amp',type=float,help='addative noise cont weight',default=0.1)
+    parser.add_argument('--noise_amp',type=float,help='addative noise cont weight',default=0.01)
     parser.add_argument('--min_size',type=int,help='image minimal size at the coarser scale',default=25)
     parser.add_argument('--max_size', type=int,help='image minimal size at the coarser scale', default=250)
 
@@ -102,7 +102,7 @@ def get_parser():
     parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=2)
     parser.add_argument('--num_workers', type=int, default=4)
 
     parser.add_argument('--image_mean', nargs='+', type=float, 
@@ -121,4 +121,10 @@ def get_parser():
     parser.add_argument('--log_pad_value', help='Value for the padded pixels', type=int, default=0)
     parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=10)
 
+    # Losses    
+    parser.add_argument('--mesh_edge_loss_weight', type=float, default=1.00, help='Mesh edge loss')    
+    parser.add_argument('--mesh_normal_consistency_weight', type=float, default=0.01, help='Mesh edge loss')
+    parser.add_argument('--mesh_laplacian_smoothing_weight', type=float, default=0.01, help='Mesh edge loss')
+    parser.add_argument('--mesh_laplacian_smoothing_method', default='uniform', 
+                        help='Laplacian smoothing type uniform, cot or cotcurv')
     return parser
