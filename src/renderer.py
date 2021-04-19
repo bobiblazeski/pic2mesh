@@ -80,26 +80,18 @@ class Renderer(torch.nn.Module):
 
     
     def __call__(self, points, normals=None, translate=True):
-        bs = points.size(0) # (b, 3, w, h)
-        points = points.reshape(bs, 3, -1).permute(0, 2, 1)
+        assert len(points.shape) == 3 and points.shape[-1] == 3
+        bs = points.size(0)
         rgb = torch.ones((bs, points.size(1), 3), 
                          device=points.device) * self.max_brightness
-        if normals is not None:
-            normals = normals.reshape(bs, 3, -1).permute(0, 2, 1)            
-        else:            
-            normals = self.get_vertex_normals(points)
-                
+        if normals is None:
+            normals = self.get_vertex_normals(points)            
         if translate:
             tm = points.mean(dim=-2, keepdim=False)
-            T = T3.Translate(-tm, device=points.device)
-            # print('points.shape, normals.shape, tm.shape', 
-            #       points.shape, normals.shape, tm.shape)
+            T = T3.Translate(-tm, device=points.device)            
             points = T.transform_points(points)
             # There's error on normals
             # Probably not needed on just translation
-            #normals = T.transform_normals(normals)
-
-        point_cloud = Pointclouds(points=points, 
-                          normals=normals,
-                          features=rgb)
-        return self.renderer(point_cloud)
+            # normals = T.transform_normals(normals)
+        cloud = Pointclouds(points=points, normals=normals, features=rgb)
+        return self.renderer(cloud)

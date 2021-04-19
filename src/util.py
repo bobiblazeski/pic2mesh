@@ -329,3 +329,6 @@ def vertex_tri_maps(faces):
             vert_tri_indices[r, c] = tri_id
             vert_tri_weights[r, c] = weight
     return vert_tri_indices, vert_tri_weights.unsqueeze(dim=-1)[None]
+
+def grid_to_list(t):
+    return t.reshape(t.size(0), 3, -1).permute(0, 2, 1)

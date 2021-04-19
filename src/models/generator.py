@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from src.stylegan2.op import fused_leaky_relu
 from src.stylegan2.Blocks import ModConvLayer
 from src.models.blocks import ConvBlock
-
+from src.util import grid_to_list
 
 
 # Generator
@@ -35,5 +35,6 @@ class Generator(nn.Module):
         x = self.head(x)        
         x = self.body(x)        
         x = self.tail(x)        
+        x = grid_to_list(x)
         return x
     
