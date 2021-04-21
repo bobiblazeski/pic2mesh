@@ -19,7 +19,7 @@ def get_parser():
                         default=[0.0, -1.0, 2.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
-    parser.add_argument('--raster_image_size', type=int, default=256,
+    parser.add_argument('--raster_image_size', type=int, default=128,
                         help='Rasterizer image size')
     parser.add_argument('--raster_radius', type=float, default=0.01, 
                         help='Points radius')
@@ -102,7 +102,7 @@ def get_parser():
     parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
-    parser.add_argument('--batch_size', type=int, default=2)
+    parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--num_workers', type=int, default=4)
 
     parser.add_argument('--image_mean', nargs='+', type=float, 

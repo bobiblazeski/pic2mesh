@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 
 from src.models.discriminator import Discriminator
 from src.models.generator import Generator
-from src.renderer import Renderer
+from src.render.renderer import Renderer
 
 class GAN(pl.LightningModule):
     
@@ -18,7 +18,7 @@ class GAN(pl.LightningModule):
         self.std = sum(hparams.image_std) / len(hparams.image_std)
         
         self.G = Generator(hparams)
-        self.D = Discriminator(hparams)                
+        self.D = Discriminator(hparams)        
         self.R = Renderer(hparams)
      
     def forward(self, shape, style):

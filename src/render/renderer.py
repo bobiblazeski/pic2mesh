@@ -13,7 +13,7 @@ from pytorch3d.renderer import (
     PointsRasterizationSettings,
 )
 
-from src.ShadingPointsRenderer import (
+from src.render.ShadingPointsRenderer import (
     ShadingCompositor,
     ShadingPointsRenderer,
 )
