@@ -4,11 +4,14 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from src.util import make_faces
+
 class BlueprintSampler(torch.nn.Module):
     
     def __init__(self, opt):
         super().__init__()                
         self.patch_size = opt.data_patch_size
+        self.faces = torch.tensor(make_faces(self.patch_size , self.patch_size))[None]
         
         blueprint = np.load(os.path.join(opt.data_dir, opt.blueprint))        
         points = torch.tensor(blueprint['points'])
@@ -32,4 +35,10 @@ class BlueprintSampler(torch.nn.Module):
             h = randint(0, self.hmax - self.patch_size)          
             points[i] = self.points[:, w:w + self.patch_size, h:h + self.patch_size]
             normals[i] = self.normals[:, w:w + self.patch_size, h:h + self.patch_size]
-        return points, normals
+
+        faces = self.faces.expand(bs, -1, -1)
+        return {
+          "points": points, 
+          "normals": normals,
+          "faces": faces,
+        }
