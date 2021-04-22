@@ -18,10 +18,9 @@ from src.render.ShadingPointsRenderer import (
     ShadingPointsRenderer,
 )
 
-
-class Renderer(torch.nn.Module):
+class PointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
-        super(Renderer, self).__init__()
+        super(PointsRenderer, self).__init__()
         self.opt = opt
         self.max_brightness = opt.raster_max_brightness        
         trimap =  torch.load(os.path.join(opt.data_dir, 

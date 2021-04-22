@@ -27,6 +27,8 @@ def get_parser():
     parser.add_argument('--raster_patch_size', type=int, default=512)
     parser.add_argument('--raster_max_brightness', type=float, default=0.7, 
                         help='Maximum brightness of pixel, [0-1]')
+    parser.add_argument('--pulsar_gamma', type=float, default=1e-4, 
+                        help='Gamma used in pulsar renderer.')
 
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 

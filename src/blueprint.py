@@ -209,3 +209,5 @@ def single_path_sample(path, layer_no, total_layers):
     pnt, nrm, _ = get_sample(pos, normed, 
                              path['points'], path['normals'])
     return pnt, nrm
+
+    
