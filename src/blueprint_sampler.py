@@ -13,14 +13,14 @@ class BlueprintSampler(torch.nn.Module):
         self.patch_size = opt.data_patch_size
         self.faces = torch.tensor(make_faces(self.patch_size , self.patch_size))[None]
         
-        blueprint = np.load(os.path.join(opt.data_dir, opt.blueprint))        
+        blueprint = np.load(os.path.join(opt.data_dir, opt.data_blueprint))        
         points = torch.tensor(blueprint['points'])
         normals = torch.tensor(blueprint['normals'])
         assert len(points.shape) == 4 and len(normals.shape) == 4
-        points = F.interpolate(points, size=opt.data_blueprint_size,
-                               mode='bicubic', align_corners=True)
-        normals = F.interpolate(normals, size=opt.data_blueprint_size, 
-                                mode='bicubic', align_corners=True)        
+        # points = F.interpolate(points, size=opt.data_blueprint_size,
+        #                        mode='bicubic', align_corners=True)
+        # normals = F.interpolate(normals, size=opt.data_blueprint_size, 
+        #                         mode='bicubic', align_corners=True)       
         normals = F.normalize(normals)        
         self.points = points[0]
         self.normals = normals[0]        

@@ -92,7 +92,7 @@ def get_parser():
     parser.add_argument('--alpha',type=float, help='reconstruction loss weight',default=10)
 
     # data module
-    parser.add_argument('--data_blueprint', help='Blueprint file', default='./data/blueprint127.npz')
+    parser.add_argument('--data_blueprint', help='Blueprint file', default='blueprint_radial_256.npz')
     parser.add_argument('--data_image_dir', help='Images directory', 
                         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024/')
     parser.add_argument('--data_mask_dir', help='Image masks directory', 

@@ -127,6 +127,7 @@ def it_intersects(edge, latitude, bridge):
     return get_intersection_point(latitude, edge_vertex, edge_vertex_normals)
     
 
+
 def make_latitudes(n):
     r_angle = torch.stack((
         torch.zeros(n) + 2,
