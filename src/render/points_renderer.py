@@ -17,17 +17,14 @@ from src.render.ShadingPointsRenderer import (
     ShadingCompositor,
     ShadingPointsRenderer,
 )
+from src.vertex_normals import VertexNormals
 
 class PointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
         super(PointsRenderer, self).__init__()
         self.opt = opt
-        self.max_brightness = opt.raster_max_brightness        
-        trimap =  torch.load(os.path.join(opt.data_dir, 
-            'trimap_{}.pth'.format(opt.data_patch_size)))        
-        self.register_buffer('faces',  trimap['faces'])
-        self.register_buffer('vert_tri_indices', trimap['vert_tri_indices'])
-        self.register_buffer('vert_tri_weights', trimap['vert_tri_weights'])
+        self.max_brightness = opt.raster_max_brightness                
+        self.vrt_nrm = VertexNormals(opt)
         self.renderer = None
     
     def setup(self, device):
@@ -60,31 +57,13 @@ class PointsRenderer(torch.nn.Module):
             compositor=compositor,
         )
     
-    def get_face_normals(self, vrt):
-        faces = self.faces
-        v1 = vrt.index_select(1,faces[:, 1]) - vrt.index_select(1, faces[:, 0])
-        v2 = vrt.index_select(1,faces[:, 2]) - vrt.index_select(1, faces[:, 0])
-        face_normals = F.normalize(v1.cross(v2), p=2, dim=-1)  # [F, 3]
-        return face_normals
-
-    def get_vertex_normals(self, vrt):
-        face_normals = self.get_face_normals(vrt)
-        bs = face_normals.size(0)
-        r, c = self.vert_tri_indices.shape
-        fn_group = face_normals.index_select(1, 
-            self.vert_tri_indices.flatten()).reshape(bs, r, c, 3)
-        weighted_fn_group = fn_group * self.vert_tri_weights    
-        vertex_normals = weighted_fn_group.sum(dim=-2)
-        return F.normalize(vertex_normals, p=2, dim=-1)
-
-    
     def __call__(self, points, normals=None, translate=True):
         assert len(points.shape) == 3 and points.shape[-1] == 3
         bs = points.size(0)
         rgb = torch.ones((bs, points.size(1), 3), 
                          device=points.device) * self.max_brightness
         if normals is None:
-            normals = self.get_vertex_normals(points)            
+            normals = self.vrt_nrm(points)            
         if translate:
             tm = points.mean(dim=-2, keepdim=False)
             T = T3.Translate(-tm, device=points.device)            
