@@ -46,7 +46,7 @@ class VertexNormals(torch.nn.Module):
         return face_normals
     
     def __repr__(self):
-        return f'VertexNormals: size: {self.latitudes_num} path: {self.path}'
+        return f'VertexNormals: size: {self.size} path: {self.path}'
     
     def make_trimap(self, size):
         faces = torch.tensor(make_faces(size, size))

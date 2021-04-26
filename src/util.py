@@ -334,6 +334,14 @@ def vertex_tri_maps(faces):
 def grid_to_list(t):
     return t.reshape(t.size(0), 3, -1).permute(0, 2, 1)
 
+# def make_faces(w, h):
+#     mesh_indices = []
+#     for iw  in range(w-1):
+#         for ih in range(h-1):
+#             mesh_indices.append([iw*w+ih, iw*w+ih+1, (iw+1)*w+ih])            
+#             mesh_indices.append([iw*w+ih+1, (iw+1)*w+ih+1, (iw+1)*w+ih])
+#     return np.array(mesh_indices)   
+
 def create_strips(n, m):
     res = []
     for i in range(n-1):
@@ -347,4 +355,4 @@ def create_strips(n, m):
 
 def make_faces(n, m):
     strips = create_strips(n, m)    
-    return triangle_strips_to_faces(strips)    
+    return triangle_strips_to_faces(strips)
