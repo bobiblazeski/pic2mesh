@@ -10,6 +10,7 @@ from geomdl import BSpline, knotvector
 from geomdl.visualization import VisPlotly
 
 import trimesh
+from trimesh.util import triangle_strips_to_faces
 from sklearn.preprocessing import minmax_scale
 # pylint: disable=maybe-no-member
 
@@ -45,13 +46,13 @@ def feature_loss(input, in_feat, target, out_feat,
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-def make_faces(w, h):
-    mesh_indices = []
-    for iw  in range(w-1):
-        for ih in range(h-1):
-            mesh_indices.append([iw*w+ih, iw*w+ih+1, (iw+1)*w+ih])            
-            mesh_indices.append([iw*w+ih+1, (iw+1)*w+ih+1, (iw+1)*w+ih])
-    return np.array(mesh_indices)   
+# def make_faces(w, h):
+#     mesh_indices = []
+#     for iw  in range(w-1):
+#         for ih in range(h-1):
+#             mesh_indices.append([iw*w+ih, iw*w+ih+1, (iw+1)*w+ih])            
+#             mesh_indices.append([iw*w+ih+1, (iw+1)*w+ih+1, (iw+1)*w+ih])
+#     return np.array(mesh_indices)   
 
 
 ### Rotation matrices    
@@ -332,3 +333,18 @@ def vertex_tri_maps(faces):
 
 def grid_to_list(t):
     return t.reshape(t.size(0), 3, -1).permute(0, 2, 1)
+
+def create_strips(n, m):
+    res = []
+    for i in range(n-1):
+        strip = []
+        for j in range(m):            
+            #strip.append(j+(i+1)*m)
+            strip.append(j+i*m)
+            strip.append(j+(i+1)*m)
+        res.append(strip)
+    return res
+
+def make_faces(n, m):
+    strips = create_strips(n, m)    
+    return triangle_strips_to_faces(strips)    

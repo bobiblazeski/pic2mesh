@@ -2,8 +2,12 @@ import os
 from collections import OrderedDict
 import torch
 import torch.nn.functional as F
+from src.util import (
+    make_faces,
+    vertex_tri_maps,
+)    
 
-from src.util import make_faces
+
 
 class VertexNormals(torch.nn.Module):
     
@@ -46,33 +50,11 @@ class VertexNormals(torch.nn.Module):
     
     def make_trimap(self, size):
         faces = torch.tensor(make_faces(size, size))
-        vert_tri_indices, vert_tri_weights = self.vertex_tri_maps(faces)
+        vert_tri_indices, vert_tri_weights = vertex_tri_maps(faces)
         return OrderedDict(OrderedDict([
           ('vert_tri_indices', vert_tri_indices),
           ('vert_tri_weights', vert_tri_weights),
           ('faces', faces),
         ]))
         
-    def vertex_tris(self, faces):
-        res = []
-        for vid in range(faces.max()+1):
-            vertex_faces = []
-            for fid, face in enumerate(faces):
-                if vid in face:
-                    vertex_faces.append(fid)
-            res.append(vertex_faces)
-        return res
-
-    def vertex_tri_maps(self, faces):
-        vts = self.vertex_tris(faces)
-        r, c = len(vts), max([len(x) for  x in vts])
-        vert_tri_indices = torch.zeros(r, c, dtype=torch.long)
-        vert_tri_weights = torch.zeros(r, c)    
-        for r, tris in enumerate(vts):
-            if r % 1000 == 0:
-                print(r, len(vts))
-            weight = 1. / len(tris)
-            for c, tri_id in enumerate(tris):
-                vert_tri_indices[r, c] = tri_id
-                vert_tri_weights[r, c] = weight
-        return vert_tri_indices, vert_tri_weights.unsqueeze(dim=-1)[None]
+    
