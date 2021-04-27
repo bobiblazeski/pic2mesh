@@ -3,11 +3,27 @@ from collections import OrderedDict
 import torch
 import torch.nn.functional as F
 from src.util import (
-    make_faces,
-    vertex_tri_maps,
+    make_faces,    
 )    
 
+def vertex_tris(faces):
+    res = [[] for _ in range(faces.max()+1)]
+    for fid, face in enumerate(faces):        
+        for vid in face:
+            res[vid].append(fid)        
+    return res
 
+def vertex_tri_maps(faces):
+    vts = vertex_tris(faces)
+    r, c = len(vts), max([len(x) for  x in vts])
+    vert_tri_indices = torch.zeros(r, c, dtype=torch.long)
+    vert_tri_weights = torch.zeros(r, c)    
+    for r, tris in enumerate(vts):        
+        weight = 1. #/ len(tris)
+        for c, tri_id in enumerate(tris):
+            vert_tri_indices[r, c] = tri_id
+            vert_tri_weights[r, c] = weight
+    return vert_tri_indices, vert_tri_weights.unsqueeze(dim=-1)[None]
 
 class VertexNormals(torch.nn.Module):
     
@@ -56,5 +72,3 @@ class VertexNormals(torch.nn.Module):
           ('vert_tri_weights', vert_tri_weights),
           ('faces', faces),
         ]))
-        
-    
