@@ -347,9 +347,9 @@ def create_strips(n, m):
     for i in range(n-1):
         strip = []
         for j in range(m):            
-            #strip.append(j+(i+1)*m)
-            strip.append(j+i*m)
             strip.append(j+(i+1)*m)
+            strip.append(j+i*m)
+            #strip.append(j+(i+1)*m)
         res.append(strip)
     return res
 
