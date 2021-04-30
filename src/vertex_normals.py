@@ -101,6 +101,16 @@ class VertexNormals(torch.nn.Module):
         weighted_fn_group = fn_group * fa_group   
         vertex_normals = weighted_fn_group.sum(dim=-2)
         return F.normalize(vertex_normals, p=2, dim=-1)
+
+    def vertex_normals_fast(self, vrt):
+        face_normals = self.get_face_normals(vrt, normalized=False)        
+        bs = face_normals.size(0)
+        r, c = self.vert_tri_indices.shape
+        fn_group = face_normals.index_select(1, 
+            self.vert_tri_indices.flatten()).reshape(bs, r, c, 3)
+        weighted_fn_group = fn_group * self.vert_tri_weights    
+        vertex_normals = weighted_fn_group.sum(dim=-2)
+        return F.normalize(vertex_normals, p=2, dim=-1)
     
     def vertex_normals_weighted_angles(self, vrt):
         face_normals = self.get_face_normals(vrt)
@@ -114,11 +124,13 @@ class VertexNormals(torch.nn.Module):
         vertex_normals = weighted_fn_group.sum(dim=-2)
         return F.normalize(vertex_normals, p=2, dim=-1)
     
-    def get_face_normals(self, vrt):
+    def get_face_normals(self, vrt, normalized=True):
         faces = self.faces
         v1 = vrt.index_select(1,faces[:, 1]) - vrt.index_select(1, faces[:, 0])
         v2 = vrt.index_select(1,faces[:, 2]) - vrt.index_select(1, faces[:, 0])
-        face_normals = F.normalize(v1.cross(v2), p=2, dim=-1)  # [F, 3]
+        face_normals = v1.cross(v2) # [F, 3]
+        if normalized:
+            face_normals = F.normalize(face_normals, p=2, dim=-1) # [F, 3]
         return face_normals
  
     
