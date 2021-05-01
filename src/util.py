@@ -365,6 +365,6 @@ def gaussian_kernel(l=5, sig=1.):
     return kernel[None][None].expand(3, 3, -1, -1)
 
 def gaussian_conv2d(kernel_size, sigma, padding=1):
-    conv = nn.Conv2d(3, 3, kernel_size, padding=padding)
+    conv = torch.nn.Conv2d(3, 3, kernel_size, padding=padding)
     conv.weight.data = gaussian_kernel(kernel_size, sigma)
     return conv

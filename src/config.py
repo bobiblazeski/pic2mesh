@@ -49,7 +49,7 @@ def get_parser():
     parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=256)
 
     parser.add_argument('--blueprint', default='blueprint127.npz')
-    parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.003)
+    parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.002)
     parser.add_argument('--G_use_adaptive_reparam', dest='G_use_adaptive_reparam', 
                         default=True, type=lambda x: bool(strtobool(x)))
     
