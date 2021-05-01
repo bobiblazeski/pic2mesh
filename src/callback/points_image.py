@@ -54,11 +54,13 @@ class PointsImage(pl.callbacks.Callback):
         # generate images
         with torch.no_grad():
             pl_module.eval()
-            vertices = pl_module.G(points) 
-            images1 = pl_module.R(vertices).permute(0, 3, 1, 2)
-            points, normals = grid_to_list(points), grid_to_list(normals)
-            images2 = pl_module.R(points).permute(0, 3, 1, 2)
-            images3 = pl_module.R(points, normals=normals).permute(0, 3, 1, 2)
+            vertices = pl_module.G(points)
+            calc_normals = pl_module.R.vrt_nrm.vertex_normals_fast(vertices.detach())
+            images1 = pl_module.R(vertices, normals=calc_normals).permute(0, 3, 1, 2)
+
+            points, normals = grid_to_list(points), grid_to_list(normals)            
+            images2 = pl_module.R(points, normals=normals).permute(0, 3, 1, 2) 
+                      
             images = torch.cat((images1, images2))
             pl_module.train()
 
