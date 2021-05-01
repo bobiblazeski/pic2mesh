@@ -356,3 +356,15 @@ def create_strips(n, m):
 def make_faces(n, m):
     strips = create_strips(n, m)    
     return triangle_strips_to_faces(strips)
+
+def gaussian_kernel(l=5, sig=1.):
+    ax = np.linspace(-(l - 1) / 2., (l - 1) / 2., l)
+    xx, yy = np.meshgrid(ax, ax)
+    kernel = np.exp(-0.5 * (np.square(xx) + np.square(yy)) / np.square(sig))
+    kernel = torch.tensor(kernel / np.sum(kernel)).float()
+    return kernel[None][None].expand(3, 3, -1, -1)
+
+def gaussian_conv2d(kernel_size, sigma, padding=1):
+    conv = nn.Conv2d(3, 3, kernel_size, padding=padding)
+    conv.weight.data = gaussian_kernel(kernel_size, sigma)
+    return conv
