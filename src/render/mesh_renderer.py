@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from pytorch3d.structures import Pointclouds
 import pytorch3d.transforms as T3
-
+from pytorch3d.structures import Meshes
 from pytorch3d.renderer import (
     FoVPerspectiveCameras,
     look_at_view_transform,
@@ -13,23 +13,19 @@ from pytorch3d.renderer import (
     MeshRenderer, 
     MeshRasterizer,  
     SoftPhongShader,
+    TexturesVertex,
 )
+from pytorch3d.renderer.blending import BlendParams
 
-from src.render.ShadingPointsRenderer import (
-    ShadingCompositor,
-    ShadingPointsRenderer,
-)
+from src.util import make_faces
 
-class PointsRenderer(torch.nn.Module):
+class MeshPointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
-        super(PointsRenderer, self).__init__()
+        super(MeshPointsRenderer, self).__init__()
         self.opt = opt
-        self.max_brightness = opt.raster_max_brightness        
-        trimap =  torch.load(os.path.join(opt.data_dir, 
-            'trimap_{}.pth'.format(opt.data_patch_size)))        
-        self.register_buffer('faces',  trimap['faces'])
-        self.register_buffer('vert_tri_indices', trimap['vert_tri_indices'])
-        self.register_buffer('vert_tri_weights', trimap['vert_tri_weights'])
+        self.max_brightness = opt.raster_max_brightness
+        size = opt.data_patch_size
+        self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
         self.renderer = None
     
     def setup(self, device):
@@ -43,50 +39,35 @@ class PointsRenderer(torch.nn.Module):
             device=device, R=R, T=T)
         raster_settings = RasterizationSettings(
             image_size= self.opt.raster_image_size, 
-            blur_radius=0.0, 
-            faces_per_pixel=1,
+            blur_radius=self.opt.raster_blur_radius, 
+            faces_per_pixel=self.opt.raster_faces_per_pixel,
         )
-        rasterizer=MeshRasterizer(
+        rasterizer= MeshRasterizer(
             cameras=cameras, 
             raster_settings=raster_settings
-        ),        
+        )        
         lights = PointLights(device=device, 
                              location=[self.opt.lights_location])
-        compositor = SoftPhongShader(
+        shader = SoftPhongShader(
             device=device, 
             cameras=cameras,
-            lights=lights
+            lights=lights,
+            blend_params=BlendParams(
+              self.opt.blend_params_sigma,
+              self.opt.blend_params_gamma,
+              self.opt.blend_params_background_color,
+            ),
         )        
-        self.renderer = ShadingPointsRenderer(
+        self.renderer = MeshRenderer(
             rasterizer=rasterizer,
-            compositor=compositor,
+            shader=shader,
         )
     
-    def get_face_normals(self, vrt):
-        faces = self.faces
-        v1 = vrt.index_select(1,faces[:, 1]) - vrt.index_select(1, faces[:, 0])
-        v2 = vrt.index_select(1,faces[:, 2]) - vrt.index_select(1, faces[:, 0])
-        face_normals = F.normalize(v1.cross(v2), p=2, dim=-1)  # [F, 3]
-        return face_normals
-
-    def get_vertex_normals(self, vrt):
-        face_normals = self.get_face_normals(vrt)
-        bs = face_normals.size(0)
-        r, c = self.vert_tri_indices.shape
-        fn_group = face_normals.index_select(1, 
-            self.vert_tri_indices.flatten()).reshape(bs, r, c, 3)
-        weighted_fn_group = fn_group * self.vert_tri_weights    
-        vertex_normals = weighted_fn_group.sum(dim=-2)
-        return F.normalize(vertex_normals, p=2, dim=-1)
-
-    
-    def __call__(self, points, faces, normals=None, translate=True):
+    def __call__(self, points, normals=None, translate=True):
         assert len(points.shape) == 3 and points.shape[-1] == 3
         bs = points.size(0)
         rgb = torch.ones((bs, points.size(1), 3), 
-                         device=points.device) * self.max_brightness
-        if normals is None:
-            normals = self.get_vertex_normals(points)            
+                         device=points.device) * self.max_brightness                 
         if translate:
             tm = points.mean(dim=-2, keepdim=False)
             T = T3.Translate(-tm, device=points.device)            
@@ -94,5 +75,9 @@ class PointsRenderer(torch.nn.Module):
             # There's error on normals
             # Probably not needed on just translation
             # normals = T.transform_normals(normals)
-        cloud = Pointclouds(points=points, normals=normals, features=rgb)
-        return self.renderer(cloud)
+        
+        faces = self.faces.expand(bs, -1, -1)        
+        verts_rgb = torch.ones_like(points)
+        textures = TexturesVertex(verts_features=verts_rgb.to(points.device))        
+        mesh = Meshes(verts=points, faces=faces, textures=textures)
+        return self.renderer(mesh)

@@ -30,6 +30,16 @@ def get_parser():
     parser.add_argument('--pulsar_gamma', type=float, default=1e-4, 
                         help='Gamma used in pulsar renderer.')
 
+    parser.add_argument('--raster_blur_radius', type=float, default=0.01)
+    parser.add_argument('--raster_faces_per_pixel', type=int, default=4)
+
+        
+    parser.add_argument('--blend_params_sigma', type=float, default=0.0001)
+    parser.add_argument('--blend_params_gamma', type=float, default=0.0001)
+    parser.add_argument('--blend_params_background_color', nargs='+', type=float, 
+                        default=[0.0, 0.0, 0.0],
+                        help="Examples: -blend_params_background_color 0.0 -1.0 3.0")
+
     # Discriminator
     parser.add_argument('--D_num_outcomes', help='No of discriminator outcomes', 
                         default=1)            
