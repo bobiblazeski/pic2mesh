@@ -114,7 +114,7 @@ def get_parser():
     parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--num_workers', type=int, default=4)
 
     parser.add_argument('--image_mean', nargs='+', type=float, 

@@ -14,8 +14,7 @@ from src.util import grid_to_list
 # Takes a style and produces a high resolution model            
 class Generator(nn.Module):
     def __init__(self, opt):
-        super(Generator, self).__init__()
-        self.noise_amp = opt.G_noise_amp                
+        super(Generator, self).__init__()                      
         in_ch, out_ch, ker_size, stride, padd_size = (opt.G_in_ch,
             opt.G_out_ch, opt.ker_size, opt.stride, opt.padd_size)
         self.head =  ConvBlock(in_ch, out_ch, ker_size,stride, padd_size)
@@ -29,10 +28,8 @@ class Generator(nn.Module):
             nn.Tanh(),
         )
     
-    def forward(self, points):        
-        noise = torch.randn_like(points) * self.noise_amp                
-        x = points + noise
-        x = self.head(x)        
+    def forward(self, points):                
+        x = self.head(points)
         x = self.body(x)        
         x = self.tail(x)        
         x = grid_to_list(x)
