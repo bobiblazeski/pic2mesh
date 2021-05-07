@@ -18,38 +18,18 @@ class PointsImage(pl.callbacks.Callback):
         self.padding = opt.log_grid_padding                
         self.pad_value = opt.log_pad_value
         self.patch_size = opt.data_patch_size
-        self.log_batch_interval = opt.log_batch_interval
-        
-        blueprint = np.load(os.path.join(opt.data_dir, opt.blueprint))        
-        points = torch.tensor(blueprint['points'])
-        normals = torch.tensor(blueprint['normals'])
-        assert len(points.shape) == 4 and len(normals.shape) == 4
-        points = F.interpolate(points, size=opt.data_blueprint_size,
-                               mode='bicubic', align_corners=True)
-        normals = F.interpolate(normals, size=opt.data_blueprint_size, 
-                                mode='bicubic', align_corners=True)        
-        normals = F.normalize(normals)        
-        self.points = points[0]
-        self.normals = normals[0]        
-        self.wmax = self.points.size(-1)
-        self.hmax = self.points.size(-2)
-    
-    def sample_blueprint(self, bs):
-        points = torch.zeros(bs, 3, self.patch_size, self.patch_size)
-        normals = torch.zeros(bs, 3, self.patch_size, self.patch_size)
-        for i in range(bs):
-            w = randint(0, self.wmax - self.patch_size)
-            h = randint(0, self.hmax - self.patch_size)          
-            points[i] = self.points[:, w:w + self.patch_size, h:h + self.patch_size]
-            normals[i] = self.normals[:, w:w + self.patch_size, h:h + self.patch_size]
-        return points, normals
+        self.log_batch_interval = opt.log_batch_interval    
         
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        # show images only every 20 batches
+        # show images only every log_batch_interval batches
         if (trainer.batch_idx + 1) % self.log_batch_interval != 0:  # type: ignore[attr-defined]
             return
-        bs = self.num_samples
-        points, normals = self.sample_blueprint(bs)
+        batch = next(iter(trainer.datamodule.train_dataloader()))
+        points = batch['points']        
+        pt_normals = batch['normals']        
+        bs = points.size(0)
+        normals = pt_normals.reshape(bs, 3, -1).permute(0, 2, 1)
+        
         points, normals = points.to(pl_module.device), normals.to(pl_module.device)        
         # generate images
         with torch.no_grad():
@@ -58,7 +38,7 @@ class PointsImage(pl.callbacks.Callback):
             images1 = pl_module.R(vertices).permute(0, 3, 1, 2)
             images1 =  images1[ :, :3, :, :]
             points = grid_to_list(points)
-            images2 = pl_module.R(points).permute(0, 3, 1, 2) 
+            images2 = pl_module.R(points, normals).permute(0, 3, 1, 2)
             images2 =  images2[ :, :3, :, :]          
             images = torch.cat((images1, images2))
             pl_module.train()
