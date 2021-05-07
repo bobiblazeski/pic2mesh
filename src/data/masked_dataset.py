@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 from random import randint
 from PIL import Image
 
-from src.util import make_faces
+from src.utilities.util import make_faces
 
 class MaskedDataset(torch.utils.data.Dataset):
     def __init__(self, config):

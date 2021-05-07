@@ -16,14 +16,16 @@ from pytorch3d.renderer import (
     TexturesVertex,
 )
 from pytorch3d.renderer.blending import BlendParams
-
-from src.util import make_faces
+from src.utilities.vertex_normals import VertexNormals
+from src.utilities.alignment import align
+from src.utilities.util import make_faces
 
 class MeshPointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
         super(MeshPointsRenderer, self).__init__()
         self.opt = opt
         self.max_brightness = opt.raster_max_brightness
+        self.vrt_nrm = VertexNormals(opt)
         size = opt.data_patch_size
         self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
         self.renderer = None
@@ -63,21 +65,18 @@ class MeshPointsRenderer(torch.nn.Module):
             shader=shader,
         )
     
-    def __call__(self, points, normals=None, translate=True):
+    def __call__(self, points, normals=None):
         assert len(points.shape) == 3 and points.shape[-1] == 3
-        bs = points.size(0)
-        rgb = torch.ones((bs, points.size(1), 3), 
-                         device=points.device) * self.max_brightness                 
-        if translate:
-            tm = points.mean(dim=-2, keepdim=False)
-            T = T3.Translate(-tm, device=points.device)            
-            points = T.transform_points(points)
-            # There's error on normals
-            # Probably not needed on just translation
-            # normals = T.transform_normals(normals)
+        bs, pts_no, device = points.size(0), points.size(1), points.device
+        rgb = torch.ones((bs, pts_no, 3), device=device) * self.max_brightness
         
         faces = self.faces.expand(bs, -1, -1)        
         verts_rgb = torch.ones_like(points)
-        textures = TexturesVertex(verts_features=verts_rgb.to(points.device))        
+        textures = TexturesVertex(verts_features=verts_rgb.to(device))
+
+        if normals is None:
+            normals = self.vrt_nrm.vertex_normals_fast(points)   
+
+        points, normals = align(points, normals)
         mesh = Meshes(verts=points, faces=faces, textures=textures)
         return self.renderer(mesh)

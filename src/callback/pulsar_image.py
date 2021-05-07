@@ -7,7 +7,7 @@ import torch.nn.functional as F
 import torchvision
 import pytorch_lightning as pl
 
-from src.util import grid_to_list
+from src.utilities.util import grid_to_list
 
 class PulsarImage(pl.callbacks.Callback):
     

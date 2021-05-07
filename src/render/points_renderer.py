@@ -17,7 +17,8 @@ from src.render.ShadingPointsRenderer import (
     ShadingCompositor,
     ShadingPointsRenderer,
 )
-from src.vertex_normals import VertexNormals
+from src.utilities.vertex_normals import VertexNormals
+from src.utilities.alignment import align
 
 class PointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
@@ -60,16 +61,12 @@ class PointsRenderer(torch.nn.Module):
     def __call__(self, points, normals=None, translate=True):
         assert len(points.shape) == 3 and points.shape[-1] == 3
         bs = points.size(0)
-        rgb = torch.ones((bs, points.size(1), 3), 
-                         device=points.device) * self.max_brightness
+        bs, pts_no, device = points.size(0), points.size(1), points.device
+        rgb = torch.ones((bs, pts_no, 3), device=device) * self.max_brightness
+
         if normals is None:
-            normals = self.vrt_nrm(points)            
-        if translate:
-            tm = points.mean(dim=-2, keepdim=False)
-            T = T3.Translate(-tm, device=points.device)            
-            points = T.transform_points(points)
-            # There's error on normals
-            # Probably not needed on just translation
-            # normals = T.transform_normals(normals)
+            normals = self.vrt_nrm.vertex_normals_fast(points)             
+        
+        points, normals = align(points, normals)
         cloud = Pointclouds(points=points, normals=normals, features=rgb)
         return self.renderer(cloud)

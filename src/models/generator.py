@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from src.stylegan2.op import fused_leaky_relu
 from src.stylegan2.Blocks import ModConvLayer
 from src.models.blocks import ConvBlock
-from src.util import grid_to_list
+from src.utilities.util import grid_to_list
 
 
 # Generator

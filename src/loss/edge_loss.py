@@ -1,7 +1,7 @@
 import torch
 
 from pytorch3d.structures import Meshes
-from src.util import make_faces
+from src.utilities.util import make_faces
 
 class EdgeLoss(torch.nn.Module):
     def __init__(self, config):
