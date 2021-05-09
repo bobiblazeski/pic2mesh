@@ -45,6 +45,7 @@ class MaskedDataset(torch.utils.data.Dataset):
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))        
         points = torch.tensor(blueprint['points'])
         normals = torch.tensor(blueprint['normals'])
+        print('Blueprint', points.shape)
         assert len(points.shape) == 4 and len(normals.shape) == 4
         points = F.interpolate(points, size=config.data_blueprint_size,
                                mode='bicubic', align_corners=True)

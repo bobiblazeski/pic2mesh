@@ -58,7 +58,7 @@ def get_parser():
     parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
     parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=256)
 
-    parser.add_argument('--blueprint', default='blueprint127.npz')
+    parser.add_argument('--blueprint', default='blueprint_radial_2048.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.002)
     parser.add_argument('--G_use_adaptive_reparam', dest='G_use_adaptive_reparam', 
                         default=True, type=lambda x: bool(strtobool(x)))
@@ -91,7 +91,7 @@ def get_parser():
 
     #optimization hyper parameters:
     parser.add_argument('--niter', type=int, default=2000, help='number of epochs to train per scale')
-    parser.add_argument('--gamma',type=float,help='scheduler gamma',default=0.1)
+    parser.add_argument('--gamma',type=float,help='scheduler gamma',default=0.1)    
     parser.add_argument('--lr_g', type=float, default=0.0005, help='learning rate, default=0.0005')
     parser.add_argument('--lr_d', type=float, default=0.0005, help='learning rate, default=0.0005')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')

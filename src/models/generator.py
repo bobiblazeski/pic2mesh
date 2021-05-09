@@ -25,13 +25,14 @@ class Generator(nn.Module):
         ]))        
         self.tail = nn.Sequential(
             nn.Conv2d(out_ch, 3, ker_size, stride, padd_size),
-            nn.Tanh(),
+            #nn.Tanh(),
         )
     
     def forward(self, points):                
         x = self.head(points)
         x = self.body(x)        
-        x = self.tail(x)        
+        x = self.tail(x)
+        x = x + points     
         x = grid_to_list(x)
         return x
     
