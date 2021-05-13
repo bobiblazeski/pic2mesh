@@ -43,41 +43,34 @@ class MaskedDataset(torch.utils.data.Dataset):
             ]),            
         }        
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))        
-        points = torch.tensor(blueprint['points'])
-        normals = torch.tensor(blueprint['normals'])
-        print('Blueprint', points.shape)
-        assert len(points.shape) == 4 and len(normals.shape) == 4
-        points = F.interpolate(points, size=config.data_blueprint_size,
-                               mode='bicubic', align_corners=True)
-        normals = F.interpolate(normals, size=config.data_blueprint_size, 
-                                mode='bicubic', align_corners=True)        
-        normals = F.normalize(normals)     
-        self.points = points[0]
-        self.normals = normals[0]        
+        self.points = torch.tensor(blueprint['points'])
+        self.normals = torch.tensor(blueprint['normals'])        
         self.wmax = self.points.size(-1)
         self.hmax = self.points.size(-2)
+        self.channels = self.points.size(0) -1
         
     def __len__(self):
         return len(self.entries)
     
     def __getitem__(self, idx):
         entry_path = self.entries[idx]
-        img = Image.open(os.path.join(self.img_dir, entry_path + '.png'))
-        mask =  torch.load(os.path.join(self.mask_dir, entry_path + '.pt'))
+        # img = Image.open(os.path.join(self.img_dir, entry_path + '.png'))
+        # mask =  torch.load(os.path.join(self.mask_dir, entry_path + '.pt'))
 
-        img_normed  = self.transform['image_normed'](img)
-        mask_resized = self.transform['mask'](mask)
-        res_masked =  img_normed * mask_resized        
-        img_patch = self.transform['img_patch'](res_masked)
-                
+        # img_normed  = self.transform['image_normed'](img)
+        # mask_resized = self.transform['mask'](mask)
+        # res_masked =  img_normed * mask_resized        
+        # img_patch = self.transform['img_patch'](res_masked)
+        
+        ch = randint(0, self.channels)
         w = randint(0, self.wmax - self.patch_size)
         h = randint(0, self.hmax - self.patch_size)          
-        points = self.points[:, w:w + self.patch_size, h:h + self.patch_size]
-        normals = self.normals[:, w:w + self.patch_size, h:h + self.patch_size]
+        points = self.points[ch, :, w:w + self.patch_size, h:h + self.patch_size]
+        normals = self.normals[ch, :, w:w + self.patch_size, h:h + self.patch_size]
         
         return {            
-            'img_patch': img_patch,
+            #'img_patch': img_patch,
             'points': points,
             'normals': normals,
-            'faces': self.faces,
+            #'faces': self.faces,
         }

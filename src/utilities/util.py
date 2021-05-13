@@ -384,4 +384,17 @@ class __SwishFn__(torch.autograd.Function):
     
 class Swish(torch.nn.Module):
     def forward(self, x):
-        return __SwishFn__.apply(x)    
+        return __SwishFn__.apply(x)   
+
+def channel_matrix(m, ch_rows, ch_cols):
+    (rows, cols) = m.shape
+    (rn, cn) = (rows // ch_rows, cols // ch_cols)
+    r = torch.zeros(ch_rows, ch_cols, rn, cn)
+    assert r.numel() == m.numel()
+    for chr_r in range(ch_rows):
+        for chr_c in range(ch_cols):
+            for i in range(rn):
+                for j in range(cn):
+                    r[chr_r, chr_c, i, j] = m[i * ch_rows + chr_r, j
+                            * ch_cols + chr_c]
+    return r.reshape(ch_rows * ch_cols, rn, cn)

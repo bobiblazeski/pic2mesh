@@ -58,7 +58,7 @@ def get_parser():
     parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
     parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=256)
 
-    parser.add_argument('--blueprint', default='blueprint_radial_2048.npz')
+    parser.add_argument('--blueprint', default='blueprint_16_512.npz')
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.002)
     parser.add_argument('--G_use_adaptive_reparam', dest='G_use_adaptive_reparam', 
                         default=True, type=lambda x: bool(strtobool(x)))
@@ -102,7 +102,7 @@ def get_parser():
     parser.add_argument('--alpha',type=float, help='reconstruction loss weight',default=10)
 
     # data module
-    parser.add_argument('--data_blueprint', help='Blueprint file', default='blueprint_radial_256.npz')
+    parser.add_argument('--data_blueprint', help='Blueprint file', default='blueprint_radial_2048.npz')
     parser.add_argument('--data_image_dir', help='Images directory', 
                         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024/')
     parser.add_argument('--data_mask_dir', help='Image masks directory', 

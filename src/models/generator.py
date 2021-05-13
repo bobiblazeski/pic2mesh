@@ -32,7 +32,7 @@ class Generator(nn.Module):
         x = self.head(points)
         x = self.body(x)        
         x = self.tail(x)
-        x = x + points     
+        #x = x + points     
         x = grid_to_list(x)
         return x
     
