@@ -42,9 +42,15 @@ class MaskedDataset(torch.utils.data.Dataset):
                 transforms.RandomCrop(config.data_patch_size),
             ]),            
         }        
-        blueprint = np.load(os.path.join(config.data_dir, config.blueprint))        
-        self.points = torch.tensor(blueprint['points'])
-        self.normals = torch.tensor(blueprint['normals'])        
+        blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
+        points = torch.tensor(blueprint['points'])
+        normals = torch.tensor(blueprint['normals'])     
+        points = F.interpolate(points, size=config.data_blueprint_size,
+                               mode='bicubic', align_corners=True)
+        normals = F.interpolate(normals, size=config.data_blueprint_size, 
+                                mode='bicubic', align_corners=True)          
+        self.points = points
+        self.normals = points
         self.wmax = self.points.size(-1)
         self.hmax = self.points.size(-2)
         self.channels = self.points.size(0) -1
