@@ -45,12 +45,12 @@ class MaskedDataset(torch.utils.data.Dataset):
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
         points = torch.tensor(blueprint['points'])
         normals = torch.tensor(blueprint['normals'])     
-        points = F.interpolate(points, size=config.data_blueprint_size,
-                               mode='bicubic', align_corners=True)
-        normals = F.interpolate(normals, size=config.data_blueprint_size, 
-                                mode='bicubic', align_corners=True)          
+        # points = F.interpolate(points, size=config.data_blueprint_size,
+        #                        mode='bicubic', align_corners=True)
+        # normals = F.interpolate(normals, size=config.data_blueprint_size, 
+        #                         mode='bicubic', align_corners=True)          
         self.points = points
-        self.normals = points
+        self.normals = normals
         self.wmax = self.points.size(-1)
         self.hmax = self.points.size(-2)
         self.channels = self.points.size(0) -1

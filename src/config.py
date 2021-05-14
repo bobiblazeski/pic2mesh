@@ -132,7 +132,8 @@ def get_parser():
                             default=False, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--log_pad_value', help='Value for the padded pixels', type=int, default=0)
     parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=10)
-
+    parser.add_argument('--log_mesh_interval', help='Mesh export interval', type=int, default=20)
+    
     # Losses    
     parser.add_argument('--mesh_edge_loss_weight', type=float, default=1.00, help='Mesh edge loss')    
     parser.add_argument('--mesh_normal_consistency_weight', type=float, default=0.01, help='Mesh edge loss')
