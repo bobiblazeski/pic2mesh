@@ -35,13 +35,14 @@ class ExportMesh(pl.callbacks.Callback):
                 os.makedirs(mesh_dir)
             file_path = os.path.join(mesh_dir, f'mesh_{trainer.current_epoch}_{i}.stl')
             mesh.export(file_path)
-
-            # vertices = grid_to_list(pts)[0].cpu().numpy()
-            # mesh = trimesh.Trimesh(vertices=vertices, faces=self.faces)
-            # mesh_dir = os.path.join(trainer.log_dir, 'mesh')
-            # if not os.path.exists(mesh_dir):
-            #     os.makedirs(mesh_dir)
-            # file_path = os.path.join(mesh_dir, f'mesh_{trainer.current_epoch}_{i}_orig.stl')
-            # mesh.export(file_path)
+            
+            if trainer.current_epoch == 0: 
+                vertices = grid_to_list(pts)[0].cpu().numpy()
+                mesh = trimesh.Trimesh(vertices=vertices, faces=self.faces)
+                mesh_dir = os.path.join(trainer.log_dir, 'mesh')
+                if not os.path.exists(mesh_dir):
+                    os.makedirs(mesh_dir)
+                file_path = os.path.join(mesh_dir, f'mesh_{trainer.current_epoch}_{i}_orig.stl')
+                mesh.export(file_path)
 
             pl_module.train()
