@@ -44,11 +44,18 @@ class MaskedDataset(torch.utils.data.Dataset):
         }        
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
         points = torch.tensor(blueprint['points'])
-        normals = torch.tensor(blueprint['normals'])     
+        normals = torch.tensor(blueprint['normals'])
+        points_coarse = F.interpolate(points, size=config.data_blueprint_coarse,
+                                      mode='bicubic', align_corners=True)
+        points_coarse = F.interpolate(points_coarse, size=config.data_blueprint_size,
+                                      mode='bicubic', align_corners=True)
+        
         points = F.interpolate(points, size=config.data_blueprint_size,
                                mode='bicubic', align_corners=True)
         normals = F.interpolate(normals, size=config.data_blueprint_size, 
-                                mode='bicubic', align_corners=True)          
+                                mode='bicubic', align_corners=True)
+
+        self.points_coarse = points_coarse
         self.points = points
         self.normals = normals
         self.wmax = self.points.size(-1)
@@ -73,10 +80,11 @@ class MaskedDataset(torch.utils.data.Dataset):
         h = randint(0, self.hmax - self.patch_size)          
         points = self.points[ch, :, w:w + self.patch_size, h:h + self.patch_size]
         normals = self.normals[ch, :, w:w + self.patch_size, h:h + self.patch_size]
-        
+        points_coarse = self.points_coarse[ch, :, w:w + self.patch_size, h:h + self.patch_size]
         return {            
             #'img_patch': img_patch,
             'points': points,
             'normals': normals,
+            'points_coarse': points_coarse,
             #'faces': self.faces,
         }

@@ -20,14 +20,17 @@ class ExportMesh(pl.callbacks.Callback):
     def on_epoch_end(self, trainer, pl_module):          
         if trainer.current_epoch % self.log_mesh_interval  != 0:
             return
-        points = trainer.datamodule.train_dataloader().dataset.points.to(pl_module.device)
+        # points = trainer.datamodule.train_dataloader().dataset.points.to(pl_module.device)
+        batch  = next(iter(trainer.datamodule.train_dataloader()))
+        points = batch['points_coarse'].to(pl_module.device)
+        # points = trainer.datamodule.train_dataloader().dataset.points_coarse#
         if self.faces is None:
             self.faces = make_faces(points.size(-2), points.size(-1))
         # generate images
         with torch.no_grad():
             pl_module.eval()
             i = randint(0, points.size(0) -1)
-            pts = points[i][None]            
+            pts = points[i][None].to(pl_module.device)          
             vertices = pl_module.G(pts)[0].cpu().numpy()
             mesh = trimesh.Trimesh(vertices=vertices, faces=self.faces)
             mesh_dir = os.path.join(trainer.log_dir, 'mesh')

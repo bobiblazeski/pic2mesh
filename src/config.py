@@ -112,6 +112,7 @@ def get_parser():
     parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)
     parser.add_argument('--data_patch_size', help='Patch size', type=int, default=256)
     parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
+    parser.add_argument('--data_blueprint_coarse', help='Blueprint coarse size', type=int, default=128)
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
 
     parser.add_argument('--batch_size', type=int, default=1)
