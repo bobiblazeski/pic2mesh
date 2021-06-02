@@ -10,6 +10,7 @@ class MaskedDataModule(pl.LightningDataModule):
         self.config = config
         self.batch_size = config.batch_size
         self.num_workers = config.num_workers
+        self.pin_memory = config.pin_memory
         
     def prepare_data(self):
         # download
@@ -19,4 +20,5 @@ class MaskedDataModule(pl.LightningDataModule):
         self.ds = MaskedDataset(self.config) 
         
     def train_dataloader(self):
-        return DataLoader(self.ds, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(self.ds, shuffle=True, batch_size=self.batch_size, 
+            num_workers=self.num_workers, pin_memory=self.pin_memory)

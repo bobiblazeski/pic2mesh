@@ -9,23 +9,26 @@ from PIL import Image
 
 from src.utilities.util import make_faces
 
+
+
 class MaskedDataset(torch.utils.data.Dataset):
     def __init__(self, config):
         self.patch_size = config.data_patch_size
+        self.full_size =  config.data_blueprint_size
         self.raster_patch_size = config.raster_patch_size        
         self.img_dir = config.data_image_dir
         self.mask_dir = config.data_mask_dir
 
         self.faces = torch.tensor(make_faces(self.patch_size, self.patch_size))
-        images =  set([x.replace('.png', '') for x 
-                       in os.listdir(self.img_dir) if x.endswith('.png')])        
+        # images =  set([x.replace('.png', '') for x 
+        #                in os.listdir(self.img_dir) if x.endswith('.png')])        
         
-        masks = set([x.replace('.pt', '') for x 
-                     in os.listdir(self.mask_dir ) if x.endswith('.pt')])        
+        # masks = set([x.replace('.pt', '') for x 
+        #              in os.listdir(self.mask_dir ) if x.endswith('.pt')])        
 
-        self.entries = list(images & masks)        
-        if len(self.entries) < len(images):
-            print('Missing masks', images - masks)
+        # self.entries = list(images & masks)        
+        # if len(self.entries) < len(images):
+        #     print('Missing masks', images - masks)
             
         self.transform = {    
             "image_normed": transforms.Compose([
@@ -44,6 +47,8 @@ class MaskedDataset(torch.utils.data.Dataset):
         }        
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
         points = torch.tensor(blueprint['points'])
+        
+        print(points.shape)
         normals = torch.tensor(blueprint['normals'])
         points_coarse = F.interpolate(points, size=config.data_blueprint_coarse,
                                       mode='bicubic', align_corners=True)
@@ -54,7 +59,7 @@ class MaskedDataset(torch.utils.data.Dataset):
                                mode='bicubic', align_corners=True)
         normals = F.interpolate(normals, size=config.data_blueprint_size, 
                                 mode='bicubic', align_corners=True)
-
+        self.entries = self.create_entries(points, self.patch_size)        
         self.points_coarse = points_coarse
         self.points = points
         self.normals = normals
@@ -63,10 +68,10 @@ class MaskedDataset(torch.utils.data.Dataset):
         self.channels = self.points.size(0) -1
         
     def __len__(self):
-        return len(self.entries)
+        return len(self.entries)        
     
     def __getitem__(self, idx):
-        entry_path = self.entries[idx]
+        # entry_path = self.entries[idx]
         # img = Image.open(os.path.join(self.img_dir, entry_path + '.png'))
         # mask =  torch.load(os.path.join(self.mask_dir, entry_path + '.pt'))
 
@@ -75,10 +80,12 @@ class MaskedDataset(torch.utils.data.Dataset):
         # res_masked =  img_normed * mask_resized        
         # img_patch = self.transform['img_patch'](res_masked)
         
-        ch = randint(0, self.channels)
-        w = randint(0, self.wmax - self.patch_size)
-        h = randint(0, self.hmax - self.patch_size)          
+        # ch = randint(0, self.channels)
+        # w = randint(0, self.wmax - self.patch_size)
+        # h = randint(0, self.hmax - self.patch_size)
+        ch, w, h = self.entries[idx]
         points = self.points[ch, :, w:w + self.patch_size, h:h + self.patch_size]
+        #assert points.size(-1) == points.size(-2) and  points.size(-2) == self.patch_size, (ch, w, h)
         normals = self.normals[ch, :, w:w + self.patch_size, h:h + self.patch_size]
         points_coarse = self.points_coarse[ch, :, w:w + self.patch_size, h:h + self.patch_size]
         return {            
@@ -88,3 +95,12 @@ class MaskedDataset(torch.utils.data.Dataset):
             'points_coarse': points_coarse,
             #'faces': self.faces,
         }
+    
+    def create_entries(self, points, patch_size):
+        ps, _, ws, hs = points.shape
+        res = []
+        for p in range(ps):
+            for w in range(ws - patch_size + 1):
+                for h in range(hs - patch_size + 1):
+                    res.append([p, w, h])
+        return torch.tensor(res)

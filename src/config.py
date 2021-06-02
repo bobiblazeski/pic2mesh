@@ -117,6 +117,9 @@ def get_parser():
 
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--num_workers', type=int, default=4)
+    parser.add_argument('--pin_memory', dest='pin_memory', 
+                        default=True, type=lambda x: bool(strtobool(x)))
+    
 
     parser.add_argument('--image_mean', nargs='+', type=float, 
                         default=[0.485, 0.456, 0.406],
