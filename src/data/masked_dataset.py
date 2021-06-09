@@ -59,7 +59,7 @@ class MaskedDataset(torch.utils.data.Dataset):
                                mode='bicubic', align_corners=True)
         normals = F.interpolate(normals, size=config.data_blueprint_size, 
                                 mode='bicubic', align_corners=True)
-        self.entries = self.create_entries(points, self.patch_size)        
+        self.entries = self.create_entries(points[0][None], self.patch_size)        
         self.points_coarse = points_coarse
         self.points = points
         self.normals = normals
@@ -88,6 +88,9 @@ class MaskedDataset(torch.utils.data.Dataset):
         #assert points.size(-1) == points.size(-2) and  points.size(-2) == self.patch_size, (ch, w, h)
         normals = self.normals[ch, :, w:w + self.patch_size, h:h + self.patch_size]
         points_coarse = self.points_coarse[ch, :, w:w + self.patch_size, h:h + self.patch_size]
+
+        # points_coarse = F.interpolate(points_coarse[None], size=points_coarse.size(-1) // 2,
+        #                         mode='bicubic', align_corners=True)[0]
         return {            
             #'img_patch': img_patch,
             'points': points,

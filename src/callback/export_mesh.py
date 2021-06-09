@@ -14,7 +14,10 @@ def export_mesh(trainer, pl_module, faces):
     pts = points[i][None].to(pl_module.device)
     with torch.no_grad():
         pl_module.eval()
-        vertices = pl_module.G(pts)[0].cpu().numpy()
+        vertices = pl_module.G(pts)
+        if len(vertices.shape) == 4:
+            vertices = grid_to_list(vertices)
+        vertices = vertices[0].cpu().numpy()
         mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
         mesh_dir = os.path.join(trainer.log_dir, 'mesh')
         if not os.path.exists(mesh_dir):
