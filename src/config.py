@@ -51,10 +51,10 @@ def get_parser():
     parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)
     
     # Stylist
-    parser.add_argument('--backbone', default='vgg9')
-    
+    parser.add_argument('--backbone', default='vgg7')
+    parser.add_argument('--latent_size', type=int, default=256)
+
     # Generator
-    parser.add_argument('--dlatent_size', type=int, default=128)
     parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
     parser.add_argument('--G_out_ch',type=int, help='Generator output channels', default=256)
 

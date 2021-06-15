@@ -9,6 +9,7 @@ import torch.nn.functional as F
 
 
 cfg = {
+    'vgg7': [64, 'M', 128, 'M', 256, 256, 'M'],
     'vgg9': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M'],
     'vgg11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
     'vgg13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
@@ -36,11 +37,11 @@ def make_layers(cfg, batch_norm=False):
 class Stylist(nn.Module):
     def __init__(self, opt):
         self.backbone= opt.backbone
-        self.output_k= opt.dlatent_size
+        self.latent_size= opt.latent_size
         super(Stylist, self).__init__()
         # network layers setting
         self.features = make_layers(cfg[self.backbone], True)        
-        self.cont = nn.Linear(512, self.output_k)
+        self.cont = nn.Linear(cfg[self.backbone][-2], self.latent_size)
 
         self._initialize_weights()
 
