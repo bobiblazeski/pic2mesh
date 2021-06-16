@@ -14,7 +14,9 @@ def export_mesh(trainer, pl_module, faces):
     pts = points[i][None].to(pl_module.device)
     with torch.no_grad():
         pl_module.eval()
-        vertices = pl_module.G(pts)
+        z_size = pl_module.hparams.latent_size
+        zero_styles = [torch.zeros(pts.size(0), z_size, device=pts.device) for _ in range(3)]
+        vertices = pl_module.G(pts, zero_styles)
         if len(vertices.shape) == 4:
             vertices = grid_to_list(vertices)
         vertices = vertices[0].cpu().numpy()
