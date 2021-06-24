@@ -8,7 +8,7 @@ class MaskedDataModule(pl.LightningDataModule):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        self.batch_size = config.batch_size
+        self.batch_size = config.reconstruction_batch_size
         self.num_workers = config.num_workers
         self.pin_memory = config.pin_memory
         

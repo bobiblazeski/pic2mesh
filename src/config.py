@@ -128,6 +128,17 @@ def get_parser():
                         default=[0.229, 0.224, 0.225],
                         help="Examples: -image_std 0.229 0.224 0.225")
     
+    parser.add_argument('--adversarial_image_root', help='Adversarial images directory',
+                        default='/home/bobi/Desktop/db/ffhq-dataset/thumbnails/')
+    parser.add_argument('--adversarial_batch_size', type=int, default=8)
+    parser.add_argument('--adversarial_image_mean', type=float, default=0.1834)
+    parser.add_argument('--adversarial_image_std', type=float, default=0.2670)
+    parser.add_argument('--adversarial_real_label', type=float, default=1.0)
+    parser.add_argument('--adversarial_fake_label', type=float, default=0.0)
+
+    parser.add_argument('--reconstruction_batch_size', type=int, default=64)
+    parser.add_argument('--contrastive_batch_size', type=int, default=128)
+
     # Logger
     parser.add_argument('--log_grid_samples', help='Log image grid number of samples', type=int, default=8)
     parser.add_argument('--log_grid_rows', help='Log image grid number of rows', type=int, default=4)

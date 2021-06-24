@@ -1,3 +1,4 @@
+# pylint: disable=unused-wildcard-import, method-hidden
 import os
 import torch 
 import torch.nn.functional as F 
@@ -19,6 +20,7 @@ from pytorch3d.renderer.blending import BlendParams
 from src.utilities.vertex_normals import VertexNormals
 from src.utilities.alignment import align
 from src.utilities.util import make_faces
+from src.utilities.util import  grid_to_list
 
 class MeshPointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
@@ -65,13 +67,13 @@ class MeshPointsRenderer(torch.nn.Module):
             shader=shader,
         )
     
-    def __call__(self, points, normals=None):
-        assert len(points.shape) == 3 and points.shape[-1] == 3
-        bs, pts_no, device = points.size(0), points.size(1), points.device
-        rgb = torch.ones((bs, pts_no, 3), device=device) * self.max_brightness
+    def __call__(self, point_grid, normals=None, mean_std=None):
+        assert len(point_grid.shape) == 4 and point_grid.shape[1] == 3
+        points = grid_to_list(point_grid)
+        bs, device = points.size(0), points.device
         
         faces = self.faces.expand(bs, -1, -1)        
-        verts_rgb = torch.ones_like(points)
+        verts_rgb = torch.ones_like(points) * self.max_brightness
         textures = TexturesVertex(verts_features=verts_rgb.to(device))
 
         if normals is None:
@@ -79,4 +81,11 @@ class MeshPointsRenderer(torch.nn.Module):
 
         points, normals = align(points, normals)
         mesh = Meshes(verts=points, faces=faces, textures=textures)
-        return self.renderer(mesh)
+        images = self.renderer(mesh)
+        
+        images = images[..., :3].mean(-1, keepdim=True)
+        images = images.permute(0, 3, 1, 2)
+        if mean_std is not None:
+            mean, std = mean_std
+            images = (images - mean) / std
+        return images
