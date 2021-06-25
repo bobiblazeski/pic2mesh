@@ -398,3 +398,13 @@ def channel_matrix(m, ch_rows, ch_cols):
                     r[chr_r, chr_c, i, j] = m[i * ch_rows + chr_r, j
                             * ch_cols + chr_c]
     return r.reshape(ch_rows * ch_cols, rn, cn)
+
+def loader_generator(loader):
+    current = 0
+    iterator = iter(loader)
+    while True:
+        if current >= len(loader):
+            current = 0
+            iterator = iter(loader)
+        yield next(iterator)
+        current += 1  

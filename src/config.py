@@ -47,7 +47,7 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--D_use_spectral_norm', dest='D_use_spectral_norm', 
                         default=False, type=lambda x: bool(strtobool(x)))
-    parser.add_argument('--D_in_ch', type=int, help='Discriminator input channels: 3 RGB, 1 Greyscale', default=3)
+    parser.add_argument('--D_in_ch', type=int, help='Discriminator input channels: 3 RGB, 1 Greyscale', default=1)
     parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)
     
     # Stylist
@@ -109,15 +109,13 @@ def get_parser():
                         default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
-    parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)
-    parser.add_argument('--data_patch_size', help='Patch size', type=int, default=256)
-    parser.add_argument('--data_blueprint_size', help='Blueprint (interpolated) size', type=int, default=640)
-    parser.add_argument('--data_blueprint_coarse', help='Blueprint coarse size', type=int, default=128)
+    parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)        
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
-
-    parser.add_argument('--batch_size', type=int, default=1)
+    
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--pin_memory', dest='pin_memory', 
+                        default=True, type=lambda x: bool(strtobool(x)))
+    parser.add_argument('--shuffle', dest='shuffle', 
                         default=True, type=lambda x: bool(strtobool(x)))
     
 
@@ -135,8 +133,14 @@ def get_parser():
     parser.add_argument('--adversarial_image_std', type=float, default=0.2670)
     parser.add_argument('--adversarial_real_label', type=float, default=1.0)
     parser.add_argument('--adversarial_fake_label', type=float, default=0.0)
+    parser.add_argument('--adversarial_data_patch_size', help='Patch size', type=int, default=128)
+    parser.add_argument('--adversarial_data_blueprint_size', type=int, default=128)
+  
 
     parser.add_argument('--reconstruction_batch_size', type=int, default=64)
+    parser.add_argument('--reconstruction_data_patch_size', help='Patch size', type=int, default=32)
+    parser.add_argument('--reconstruction_data_blueprint_size', type=int, default=128)    
+
     parser.add_argument('--contrastive_batch_size', type=int, default=128)
 
     # Logger

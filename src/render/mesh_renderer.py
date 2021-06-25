@@ -28,7 +28,7 @@ class MeshPointsRenderer(torch.nn.Module):
         self.opt = opt
         self.max_brightness = opt.raster_max_brightness
         self.vrt_nrm = VertexNormals(opt)
-        size = opt.data_patch_size
+        size = opt.adversarial_data_patch_size
         self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
         self.renderer = None
     
@@ -81,10 +81,10 @@ class MeshPointsRenderer(torch.nn.Module):
 
         points, normals = align(points, normals)
         mesh = Meshes(verts=points, faces=faces, textures=textures)
-        images = self.renderer(mesh)
-        
-        images = images[..., :3].mean(-1, keepdim=True)
-        images = images.permute(0, 3, 1, 2)
+        r_images = self.renderer(mesh)
+        print(r_images.shape)
+        r_images = r_images.permute(0, 3, 1, 2).contiguous()
+        images = r_images[:, :, :, :3].mean(1, keepdim=True)        
         if mean_std is not None:
             mean, std = mean_std
             images = (images - mean) / std
