@@ -81,8 +81,7 @@ class MeshPointsRenderer(torch.nn.Module):
 
         points, normals = align(points, normals)
         mesh = Meshes(verts=points, faces=faces, textures=textures)
-        r_images = self.renderer(mesh)
-        print(r_images.shape)
+        r_images = self.renderer(mesh)        
         r_images = r_images.permute(0, 3, 1, 2).contiguous()
         images = r_images[:, :, :, :3].mean(1, keepdim=True)        
         if mean_std is not None:
