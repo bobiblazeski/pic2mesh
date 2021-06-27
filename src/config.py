@@ -16,7 +16,7 @@ def get_parser():
     parser.add_argument('--viewpoint_azimuth', type=float, default=0.0, 
                         help='No rotation so the camera is positioned on the +Z axis')
     parser.add_argument('--lights_location', nargs='+', type=float, 
-                        default=[0.0, -1.0, 2.0],
+                        default=[0.0, 0.0, 3.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
     parser.add_argument('--raster_image_size', type=int, default=128,
@@ -30,7 +30,7 @@ def get_parser():
     parser.add_argument('--pulsar_gamma', type=float, default=1e-4, 
                         help='Gamma used in pulsar renderer.')
 
-    parser.add_argument('--raster_blur_radius', type=float, default=0.01)
+    parser.add_argument('--raster_blur_radius', type=float, default=0.0) # More than 1 black face
     parser.add_argument('--raster_faces_per_pixel', type=int, default=4)
 
         

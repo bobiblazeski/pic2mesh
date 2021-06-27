@@ -18,7 +18,7 @@ from pytorch3d.renderer import (
 )
 from pytorch3d.renderer.blending import BlendParams
 from src.utilities.vertex_normals import VertexNormals
-from src.utilities.alignment import align
+import src.utilities.alignment as alignment 
 from src.utilities.util import make_faces
 from src.utilities.util import  grid_to_list
 
@@ -75,15 +75,15 @@ class MeshPointsRenderer(torch.nn.Module):
         faces = self.faces.expand(bs, -1, -1)        
         verts_rgb = torch.ones_like(points) * self.max_brightness
         textures = TexturesVertex(verts_features=verts_rgb.to(device))
-
+                
         if normals is None:
-            normals = self.vrt_nrm.vertex_normals_fast(points)   
-
-        points, normals = align(points, normals)
+          normals = self.vrt_nrm.vertex_normals_fast(points)   
+        points, normals = alignment.align(points, normals)
+        
         mesh = Meshes(verts=points, faces=faces, textures=textures)
         r_images = self.renderer(mesh)        
         r_images = r_images.permute(0, 3, 1, 2).contiguous()
-        images = r_images[:, :, :, :3].mean(1, keepdim=True)        
+        images = r_images[:, :3, :, :].mean(1, keepdim=True)
         if mean_std is not None:
             mean, std = mean_std
             images = (images - mean) / std

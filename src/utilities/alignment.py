@@ -32,14 +32,17 @@ def get_min_max(points):
             points.max(dim=1).values)
 
 
-def align(points, normals):
+def align(points, normals, rotate=True):
     device = points.device
-    # Rotate points
-    vec = F.normalize(normals.mean(dim=1), dim=-1)
-    rot_mat = get_rotation_matrix(vec)
-    RT = T3.Rotate(rot_mat, device=device)
-    t_points = RT.transform_points(points)
-    t_normals = RT.transform_normals(normals)
+    if rotate:
+      # Rotate points
+      vec = F.normalize(normals.mean(dim=1), dim=-1)
+      rot_mat = get_rotation_matrix(vec)
+      RT = T3.Rotate(rot_mat, device=device)
+      t_points = RT.transform_points(points)
+      t_normals = RT.transform_normals(normals)
+    else:
+       t_points = points
 
     # Translate points
     tm = t_points.mean(dim=-2, keepdim=False)
