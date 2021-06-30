@@ -9,7 +9,7 @@ def get_parser():
     parser.add_argument('--data_dir', help='Tensor storage',default='./data/')
 
     # Renderer    
-    parser.add_argument('--viewpoint_distance', type=float, default=1.25, 
+    parser.add_argument('--viewpoint_distance', type=float, default=2.25,
                         help='Distance from camera to the object')
     parser.add_argument('--viewpoint_elevation', type=float, default=0.0, 
                         help='Angle of elevation in degrees')

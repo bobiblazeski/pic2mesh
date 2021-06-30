@@ -71,15 +71,15 @@ class Generator(nn.Module):
                       padding=padding, pool=self.pools[0])
         self.b2 = GenBlock(latent_size, out_ch, out_ch, ker_size, stride=stride, 
                       padding=padding, pool=self.pools[1])
-#         self.b3 = GenBlock(latent_size, out_ch, out_ch, ker_size, stride=stride, 
-#                            padding=padding, pool=self.pools[2])
+        self.b3 = GenBlock(latent_size, out_ch, out_ch, ker_size, stride=stride, 
+                           padding=padding, pool=self.pools[2])
     
     def forward(self, points, style):                        
         x = self.head(points)
         
         x, vrt = self.b1(x, style, points)
         x, vrt = self.b2(x, style, vrt)
-        # x, vrt = self.b3(x, latents[2], vrt)
+        x, vrt = self.b3(x, style, vrt)
         
         #vrt = grid_to_list(vrt)
         return vrt

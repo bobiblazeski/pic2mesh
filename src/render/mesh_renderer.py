@@ -67,7 +67,7 @@ class MeshPointsRenderer(torch.nn.Module):
             shader=shader,
         )
     
-    def __call__(self, point_grid, normals=None, mean_std=None):
+    def __call__(self, point_grid, normals=None, mean_std=None, align=False):
         assert len(point_grid.shape) == 4 and point_grid.shape[1] == 3
         points = grid_to_list(point_grid)
         bs, device = points.size(0), points.device
@@ -75,10 +75,11 @@ class MeshPointsRenderer(torch.nn.Module):
         faces = self.faces.expand(bs, -1, -1)        
         verts_rgb = torch.ones_like(points) * self.max_brightness
         textures = TexturesVertex(verts_features=verts_rgb.to(device))
-                
-        if normals is None:
-          normals = self.vrt_nrm.vertex_normals_fast(points)   
-        points, normals = alignment.align(points, normals)
+
+        if align:
+            if normals is None:
+                normals = self.vrt_nrm.vertex_normals_fast(points)   
+            points, normals = alignment.align(points, normals)
         
         mesh = Meshes(verts=points, faces=faces, textures=textures)
         r_images = self.renderer(mesh)        
