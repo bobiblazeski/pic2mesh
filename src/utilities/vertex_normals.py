@@ -59,10 +59,11 @@ class VertexNormals(torch.nn.Module):
         super().__init__()
         self.size = opt.adversarial_data_patch_size
         self.path = os.path.join(opt.data_dir, 
-            'trimap_{}.pth'.format(self.size))
+            'trimap/trimap_{}.pth'.format(self.size))
         if load and os.path.exists(self.path):
             trimap = torch.load(self.path)
         else:
+            print('Creating trimap this might take long.')
             trimap = self.make_trimap(self.size)
             torch.save(trimap, self.path)
         self.assign_trimap(trimap)
