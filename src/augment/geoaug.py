@@ -16,13 +16,26 @@ def GeoAugment(x, policy='', channels_first=True):
     return x
 
 def rand_translation(x, ratio=0.125):
-    translations = torch.FloatTensor(16, 3).uniform_(-ratio, ratio)     
-    x += translations.reshape(-1, 3, 1, 1).to(x.device)
+    if len(x.shape) == 4:
+        bs = x.size(0)
+        translations = torch.FloatTensor(bs, 3).uniform_(-ratio, ratio)    
+        translations = translations.reshape(bs, 3, 1, 1)
+    else:
+        translations = torch.FloatTensor(3).uniform_(-ratio, ratio)    
+        translations = translations.reshape(3, 1, 1)
+    x += translations.to(x.device)
     return x
 
 def rand_scaling(x, ratio=0.2):
-    scalings = torch.FloatTensor(16, 3).uniform_(1-ratio, 1+ratio)     
-    x *= scalings.reshape(-1, 3, 1, 1).to(x.device)
+    if len(x.shape) == 4:    
+        bs = x.size(0)
+        scalings = torch.FloatTensor(bs, 3).uniform_(1-ratio, 1+ratio)
+        scalings = scalings.reshape(bs, 3, 1, 1).to(x.device)
+    else:
+        scalings = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)
+        scalings = scalings.reshape(3, 1, 1).to(x.device)
+
+    x *= scalings.to(x.device)
     return x
 
 
