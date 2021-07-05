@@ -48,11 +48,7 @@ def get_parser():
     parser.add_argument('--D_use_spectral_norm', dest='D_use_spectral_norm', 
                         default=False, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--D_in_ch', type=int, help='Discriminator input channels: 3 RGB, 1 Greyscale', default=1)
-    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)
-    
-    # Stylist
-    parser.add_argument('--backbone', default='vgg7')
-    parser.add_argument('--latent_size', type=int, default=256)
+    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)            
 
     # Generator
     parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
@@ -62,6 +58,11 @@ def get_parser():
     parser.add_argument('--G_noise_amp',type=float, help='Generator noise scale.', default=0.002)
     parser.add_argument('--G_use_adaptive_reparam', dest='G_use_adaptive_reparam', 
                         default=True, type=lambda x: bool(strtobool(x)))
+
+    parser.add_argument('--fast_generator_channels', nargs='+', type=int, 
+                        default=[ 128, 128, 256])
+    parser.add_argument('--fast_discriminator_channels', nargs='+', type=int, 
+                        default=[ 3, 128, 128, 256])
     
     #networks hyper parameters:
     parser.add_argument('--nfc', type=int, default=128)
@@ -117,32 +118,9 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--shuffle', dest='shuffle', 
                         default=True, type=lambda x: bool(strtobool(x)))
+        
     
-
-    parser.add_argument('--image_mean', nargs='+', type=float, 
-                        default=[0.485, 0.456, 0.406],
-                        help="Examples: -image_mean 0.485 0.456 0.406")
-    parser.add_argument('--image_std', nargs='+', type=float, 
-                        default=[0.229, 0.224, 0.225],
-                        help="Examples: -image_std 0.229 0.224 0.225")
-    
-    parser.add_argument('--adversarial_image_root', help='Adversarial images directory',
-                        default='/home/bobi/Desktop/db/ffhq-dataset/thumbnails/')
-    parser.add_argument('--adversarial_batch_size', type=int, default=8)
-    parser.add_argument('--adversarial_image_mean', type=float, default=0.1834)
-    parser.add_argument('--adversarial_image_std', type=float, default=0.2670)
-    parser.add_argument('--adversarial_real_label', type=float, default=1.0)
-    parser.add_argument('--adversarial_fake_label', type=float, default=0.0)
-    parser.add_argument('--adversarial_data_patch_size', help='Patch size', type=int, default=128)
-    parser.add_argument('--adversarial_data_blueprint_size', type=int, default=128)
-  
-
-    parser.add_argument('--reconstruction_batch_size', type=int, default=64)
-    parser.add_argument('--reconstruction_data_patch_size', help='Patch size', type=int, default=32)
-    parser.add_argument('--reconstruction_data_blueprint_size', type=int, default=128)    
-
-    parser.add_argument('--contrastive_batch_size', type=int, default=128)
-    
+    parser.add_argument('--fast_outline_size', type=int, default=32)      
     parser.add_argument('--fast_image_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
     parser.add_argument('--fast_batch_size', type=int, default=8)    
