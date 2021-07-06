@@ -60,15 +60,14 @@ class Classifier(nn.Sequential):
 class Discriminator(nn.Module):
     def __init__(self, opt):  
         super().__init__()
-
         channels = opt.fast_discriminator_channels
         self.encoder = Encoder(channels)
         self.classifier = Classifier(channels[-1])        
         self.decoder = Decoder(list(reversed(channels)))
         
-    def forward(self, images, real=False):
+    def forward(self, images, is_real):
         encodings = self.encoder(images)
         labels = self.classifier(encodings)        
-        decodings = self.decoder(encodings) if real else None
+        decodings = self.decoder(encodings) if is_real else None
         return labels, decodings
         

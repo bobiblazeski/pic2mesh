@@ -1,4 +1,4 @@
-# pylint: disable=unused-wildcard-import, method-hidden
+# pyright: reportMissingImports=false
 import os
 import torch 
 import torch.nn.functional as F 
@@ -17,8 +17,6 @@ from pytorch3d.renderer import (
     TexturesVertex,
 )
 from pytorch3d.renderer.blending import BlendParams
-from src.utilities.vertex_normals import VertexNormals
-import src.utilities.alignment as alignment 
 from src.utilities.util import make_faces
 from src.utilities.util import  grid_to_list
 
@@ -26,14 +24,12 @@ class MeshPointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
         super(MeshPointsRenderer, self).__init__()
         self.opt = opt
-        self.max_brightness = opt.raster_max_brightness
-        self.vrt_nrm = VertexNormals(opt)
-        size = opt.adversarial_data_patch_size
+        self.max_brightness = opt.raster_max_brightness        
+        size = opt.fast_outline_size
         self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
         self.renderer = None
     
-    def setup(self, device):
-        if  self.renderer is not None: return              
+    def setup(self, device):                    
         R, T = look_at_view_transform(
             self.opt.viewpoint_distance, 
             self.opt.viewpoint_elevation, 
@@ -67,25 +63,20 @@ class MeshPointsRenderer(torch.nn.Module):
             shader=shader,
         )
     
-    def __call__(self, point_grid, normals=None, mean_std=None, align=False):
-        assert len(point_grid.shape) == 4 and point_grid.shape[1] == 3
-        points = grid_to_list(point_grid)
+    def __call__(self, points, colors, mean=None, std=None):
+        assert len(points.shape) == 4 and points.shape[1] == 3
+        
+        points, colors = grid_to_list(points), grid_to_list(colors)
         bs, device = points.size(0), points.device
-        
-        faces = self.faces.expand(bs, -1, -1)        
-        verts_rgb = torch.ones_like(points) * self.max_brightness
-        textures = TexturesVertex(verts_features=verts_rgb.to(device))
+        if  self.renderer is None:
+            self.setup(device)
+        faces = self.faces.expand(bs, -1, -1)                
+        textures = TexturesVertex(verts_features=colors)
 
-        if align:
-            if normals is None:
-                normals = self.vrt_nrm.vertex_normals_fast(points)   
-            points, normals = alignment.align(points, normals)
-        
         mesh = Meshes(verts=points, faces=faces, textures=textures)
         r_images = self.renderer(mesh)        
         r_images = r_images.permute(0, 3, 1, 2).contiguous()
-        r_images = r_images[:, :3, :, :]#.mean(1, keepdim=True)
-        if mean_std is not None:
-            mean, std = mean_std
+        r_images = r_images[:, :3, :, :]
+        if mean and std:           
             r_images = (r_images - mean) / std
         return r_images

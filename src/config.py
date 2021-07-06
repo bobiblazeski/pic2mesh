@@ -124,7 +124,7 @@ def get_parser():
     parser.add_argument('--fast_image_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
     parser.add_argument('--fast_batch_size', type=int, default=8)    
-    parser.add_argument('--fast_image_size', type=int, default=256)
+    parser.add_argument('--fast_image_size', type=int, default=128)
     parser.add_argument('--fast_image_mean', type=float, default=0.5)
     parser.add_argument('--fast_image_std', type=float, default=0.5)
     parser.add_argument('--geoaug_policy', default='scaling,translation')
