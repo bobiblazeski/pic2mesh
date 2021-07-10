@@ -53,6 +53,7 @@ class Decoder(nn.Sequential):
 class Classifier(nn.Sequential):
     def __init__(self, out_ch):
         super(Classifier,self).__init__()
+        self.add_module('conv', ConvBlock(out_ch, out_ch))
         self.add_module('avgpool', nn.AdaptiveAvgPool2d((1, 1)))
         self.add_module('flatten', nn.Flatten())
         self.add_module('linear', nn.Linear(out_ch, 1))

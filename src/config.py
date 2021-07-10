@@ -23,7 +23,7 @@ def get_parser():
                         help='Rasterizer image size')
     parser.add_argument('--raster_radius', type=float, default=0.01, 
                         help='Points radius')
-    parser.add_argument('--raster_points_per_pixel', type=int, default=4)
+    parser.add_argument('--raster_points_per_pixel', type=int, default=1)
     parser.add_argument('--raster_patch_size', type=int, default=512)
     parser.add_argument('--raster_max_brightness', type=float, default=0.7, 
                         help='Maximum brightness of pixel, [0-1]')
@@ -60,9 +60,9 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
 
     parser.add_argument('--fast_generator_channels', nargs='+', type=int, 
-                        default=[ 128, 128, 256])
+                        default=[ 128, 128, 128])
     parser.add_argument('--fast_discriminator_channels', nargs='+', type=int, 
-                        default=[ 3, 128, 128, 256])
+                        default=[ 3, 128, 128, 128])
     
     #networks hyper parameters:
     parser.add_argument('--nfc', type=int, default=128)
@@ -120,11 +120,14 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
         
     
-    parser.add_argument('--fast_outline_size', type=int, default=32)      
+    parser.add_argument('--fast_outline_size', type=int, default=16)      
     parser.add_argument('--fast_image_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
-    parser.add_argument('--fast_batch_size', type=int, default=8)    
-    parser.add_argument('--fast_image_size', type=int, default=128)
+    parser.add_argument('--mask_root',
+        default='/home/bobi/Desktop/db/ffhq-dataset/masks')
+    parser.add_argument('--fast_batch_size', type=int, default=4)
+    parser.add_argument('--fast_image_size', type=int, default=64)
+    parser.add_argument('--mask_size', type=int, default=512)    
     parser.add_argument('--fast_image_mean', type=float, default=0.5)
     parser.add_argument('--fast_image_std', type=float, default=0.5)
     parser.add_argument('--geoaug_policy', default='scaling,translation')
@@ -137,7 +140,7 @@ def get_parser():
     parser.add_argument('--log_scale_each', dest='Scale each image from the grid', 
                             default=False, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--log_pad_value', help='Value for the padded pixels', type=int, default=0)
-    parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=10)
+    parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=100)
     parser.add_argument('--log_mesh_interval', help='Mesh export interval', type=int, default=20)
     
     # Losses    

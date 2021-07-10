@@ -8,14 +8,20 @@ from torchvision.transforms import (
     Normalize,
     Resize,
     RandomHorizontalFlip,
-    ToTensor,    
+    ToTensor,
+    ToPILImage,
 )
 from torchvision.datasets import ImageFolder
 from src.augment.geoaug import GeoAugment
 
-def pyramid_transform(img_size, mean=0, std=1):
+def pyramid_transform(img_size, mask_size,  mean=0, std=1):
     transform = {
+        'preprocess': Compose([
+            Resize([mask_size, mask_size]),
+            ToTensor(),            
+        ]),
         'head': Compose([
+            ToPILImage(),
             RandomHorizontalFlip(),            
         ]),
         'image': Compose([
@@ -24,7 +30,9 @@ def pyramid_transform(img_size, mean=0, std=1):
             Normalize(mean=(mean), std=(std)),
         ]),        
     }
-    def final_transform(img):
+    def final_transform(img, mask):
+        img = transform['preprocess'](img)
+        img = img * mask        
         flipped = transform['head'](img)
         return {
             'image': transform['image'](flipped),            
@@ -40,8 +48,10 @@ class FastDataset(torch.utils.data.Dataset):
         self.outline_size =  config.fast_outline_size
         self.geoaug_policy = config.geoaug_policy
 
-        self.image_root = config.fast_image_root                
+        self.image_root = config.fast_image_root
+        self.mask_root = config.mask_root            
         self.image_size = config.fast_image_size
+        self.mask_size = config.mask_size
         self.image_mean = config.fast_image_mean
         self.image_std = config.fast_image_std
         
@@ -50,8 +60,9 @@ class FastDataset(torch.utils.data.Dataset):
                        
         self.points = self.scale(points, self.outline_size)                
         
-        fast_transform = pyramid_transform(self.image_size, self.image_mean, self.image_std)
-        self.img_ds = ImageFolder(self.image_root, transform=fast_transform)      
+        self.transform = pyramid_transform(self.image_size, self.mask_size, 
+                                           self.image_mean, self.image_std)
+        self.img_ds = ImageFolder(self.image_root)
         
     def scale(self, t, size):
         return F.interpolate(t, size=size, mode='bicubic', align_corners=True)
@@ -59,10 +70,12 @@ class FastDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.img_ds)
     
-    def __getitem__(self, idx):                
+    def __getitem__(self, idx):              
         points = self.points[idx % self.points.size(0)]
-        
-        res, _ = self.img_ds[idx % len(self.img_ds)]
+        idx_img = idx % len(self.img_ds)
+        image, _ = self.img_ds[idx_img]
+        mask_path =  self.img_ds.imgs[0][0].replace(self.image_root, self.mask_root)
+        mask = torch.load(mask_path.replace('.png', '.pth'))
+        res = self.transform(image, mask)        
         res['outline'] = GeoAugment(points, policy=self.geoaug_policy)         
         return res
-

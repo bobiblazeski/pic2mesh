@@ -38,7 +38,7 @@ class MeshPointsRenderer(torch.nn.Module):
         cameras = FoVPerspectiveCameras(
             device=device, R=R, T=T)
         raster_settings = RasterizationSettings(
-            image_size= self.opt.raster_image_size, 
+            image_size= self.opt.fast_image_size, 
             blur_radius=self.opt.raster_blur_radius, 
             faces_per_pixel=self.opt.raster_faces_per_pixel,
         )
