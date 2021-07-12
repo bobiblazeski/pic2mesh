@@ -1,4 +1,7 @@
 # pyright: reportMissingImports=false
+from collections import OrderedDict
+
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -26,8 +29,7 @@ class SkipGenerator(nn.Module):
         self.head =  ConvBlock(3, channels[0])        
         self.blocks = nn.ModuleList([
            SkipBlock(in_ch, out_ch) for  (in_ch, out_ch)
-            in zip(channels, channels[1:])
-        ])
+            in zip(channels, channels[1:])])
     
     def forward(self, points):                        
         x = self.head(points)
@@ -35,12 +37,25 @@ class SkipGenerator(nn.Module):
             x, points = block(x, points)        
         return points
 
+
+class SinGenerator(nn.Sequential):
+    def __init__(self, channels):
+        super(SinGenerator,self).__init__()      
+        self.add_module('head', ConvBlock(3, channels[0]))        
+        self.add_module('main', nn.Sequential(OrderedDict([
+            ('b'+str(i), ConvBlock(in_ch, out_ch))
+            for i, (in_ch, out_ch) in 
+            enumerate(zip(channels, channels[1:]))])))
+        self.add_module('tail', ConvBlock(channels[-1], 3))
+
+
 class Generator(nn.Module):
     def __init__(self, config):
         super(Generator, self).__init__()                      
         channels =  config.fast_generator_channels 
-        self.points = SkipGenerator(channels)
-        self.colors = SkipGenerator(channels)
+        self.points = SinGenerator(channels)
+        #self.colors = SkipGenerator(channels)
     
     def forward(self, points):
-        return self.points(points), self.colors(points)
+        res = self.points(points)
+        return res, torch.ones_like(res)

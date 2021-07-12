@@ -4,7 +4,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torchvision.transforms import (
-    Compose,    
+    Compose,
+    Grayscale,
     Normalize,
     Resize,
     RandomHorizontalFlip,
@@ -26,8 +27,10 @@ def pyramid_transform(img_size, mask_size,  mean=0, std=1):
         ]),
         'image': Compose([
             Resize([img_size, img_size]),
+            Grayscale(),
             ToTensor(),
             Normalize(mean=(mean), std=(std)),
+
         ]),        
     }
     def final_transform(img, mask):
