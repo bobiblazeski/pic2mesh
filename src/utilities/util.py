@@ -386,7 +386,11 @@ class Swish(torch.nn.Module):
     def forward(self, x):
         return __SwishFn__.apply(x)   
 
-def channel_matrix(m, ch_rows, ch_cols):
+def superpixel(m, ch_rows, ch_cols):
+    '''
+    m = torch.arange(16).reshape(4, 4)
+    superpixel(m, 2, 2)
+    '''
     (rows, cols) = m.shape
     (rn, cn) = (rows // ch_rows, cols // ch_cols)
     r = torch.zeros(ch_rows, ch_cols, rn, cn)

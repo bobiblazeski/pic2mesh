@@ -70,10 +70,10 @@ def get_latitudes_angles(n):
 
 class Blueprint:
     
-    def __init__(self, path, latitudes_num):
+    def __init__(self, path, latitudes_num, offset=0.2):
         self.path = path
         self.latitudes_num = latitudes_num
-        self.bridge = Bridge(path)
+        self.bridge = Bridge(path, offset=offset)
         paths_path =  f'./data/paths_{latitudes_num}.pth'        
         if os.path.exists(paths_path):
             self.paths = torch.load(paths_path) 

@@ -4,6 +4,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils import spectral_norm
 
 from src.models.util import ConvBlock
 
@@ -37,16 +38,27 @@ class SkipGenerator(nn.Module):
             x, points = block(x, points)        
         return points
 
+class ConvBlock1(nn.Sequential):
+    def __init__(self, in_ch, out_ch):
+        super(ConvBlock1,self).__init__()
+        conv = nn.Conv2d(in_ch, out_ch, 3, 1, 1, bias=False)
+        self.add_module('conv', conv)
+        self.add_module('norm', nn.BatchNorm2d(out_ch))
+        #self.add_module('swish', nn.SiLU())
+        self.add_module('lrelu', nn.LeakyReLU(0.2))
 
 class SinGenerator(nn.Sequential):
     def __init__(self, channels):
         super(SinGenerator,self).__init__()      
-        self.add_module('head', ConvBlock(3, channels[0]))        
+        self.add_module('head', ConvBlock1(3, channels[0]))        
         self.add_module('main', nn.Sequential(OrderedDict([
-            ('b'+str(i), ConvBlock(in_ch, out_ch))
+            ('b'+str(i), ConvBlock1(in_ch, out_ch))
             for i, (in_ch, out_ch) in 
             enumerate(zip(channels, channels[1:]))])))
-        self.add_module('tail', ConvBlock(channels[-1], 3))
+        self.add_module('tail', nn.Sequential(
+            spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),
+            nn.Tanh(),
+        ))
 
 
 class Generator(nn.Module):
@@ -56,6 +68,6 @@ class Generator(nn.Module):
         self.points = SinGenerator(channels)
         #self.colors = SkipGenerator(channels)
     
-    def forward(self, points):
-        res = self.points(points)
+    def forward(self, outline, ratio=0.05):
+        res = self.points(outline) * ratio + outline * (1 - ratio)
         return res, torch.ones_like(res)

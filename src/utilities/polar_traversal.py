@@ -38,9 +38,9 @@ def get_start(mesh):
 
 class Bridge:
 
-    def __init__(self, path):
+    def __init__(self, path, offset=0.02):
         self.path = path
-        self.mesh = flip_mesh(scale_mesh(path))
+        self.mesh = flip_mesh(scale_mesh(path, offset=offset))
         self.mesh.fix_normals()
         self.faces = self.make_faces()
         self.polars = math.pi + np.array(

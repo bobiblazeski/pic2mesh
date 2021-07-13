@@ -33,7 +33,7 @@ class ImageMesh(pl.callbacks.Callback):
         # generate images
         with torch.no_grad():
             pl_module.eval()
-            points, colors = pl_module.G(batch['outline'].to(pl_module.device)    )
+            points, colors = pl_module.G(batch['outline'].to(pl_module.device))
             renders = pl_module.R(points, colors)
             pl_module.train()
 
