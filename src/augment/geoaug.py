@@ -20,23 +20,24 @@ def rand_translation(x, ratio=0.125):
         bs = x.size(0)
         translations = torch.FloatTensor(bs, 3).uniform_(-ratio, ratio)    
         translations = translations.reshape(bs, 3, 1, 1)
-    else:
+    elif len(x.shape) == 3:
         translations = torch.FloatTensor(3).uniform_(-ratio, ratio)    
         translations = translations.reshape(3, 1, 1)
-    x += translations.to(x.device)
-    return x
+    else:
+        translations = torch.FloatTensor(3).uniform_(-ratio, ratio)    
+    return x + translations.to(x.device)
 
 def rand_scaling(x, ratio=0.2):
     if len(x.shape) == 4:    
         bs = x.size(0)
         scalings = torch.FloatTensor(bs, 3).uniform_(1-ratio, 1+ratio)
         scalings = scalings.reshape(bs, 3, 1, 1).to(x.device)
-    else:
+    elif len(x.shape) == 3:
         scalings = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)
         scalings = scalings.reshape(3, 1, 1).to(x.device)
-
-    x *= scalings.to(x.device)
-    return x
+    else:
+        scalings = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)      
+    return x * scalings.to(x.device)
 
 
 AUGMENT_FNS = {

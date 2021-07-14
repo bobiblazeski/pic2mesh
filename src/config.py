@@ -123,6 +123,8 @@ def get_parser():
     parser.add_argument('--fast_outline_size', type=int, default=128)
     parser.add_argument('--fast_image_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
+    parser.add_argument('--fast_render_root',
+        default='/home/bobi/Desktop/db/renders')        
     parser.add_argument('--mask_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/masks')
     parser.add_argument('--fast_batch_size', type=int, default=8)
