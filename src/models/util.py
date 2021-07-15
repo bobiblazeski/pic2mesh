@@ -13,12 +13,13 @@ def weights_init(m):
 
 class ConvBlock(nn.Sequential):
     def __init__(self, in_ch, out_ch):
-        super(ConvBlock,self).__init__()
+        super(ConvBlock,self).__init__()        
         conv = nn.Conv2d(in_ch, out_ch, 3, 1, 1, bias=False)
-        self.add_module('conv', spectral_norm(conv))
+        self.add_module('conv', conv)
         self.add_module('norm', nn.BatchNorm2d(out_ch))
         #self.add_module('swish', nn.SiLU())
-        self.add_module('lrelu', nn.LeakyReLU(0.2, inplace=True))
+        self.add_module('lrelu', nn.LeakyReLU(0.2))
+
 
 def conv2d(*args, **kwargs):
     return spectral_norm(nn.Conv2d(*args, **kwargs))

@@ -38,28 +38,31 @@ class SkipGenerator(nn.Module):
             x, points = block(x, points)        
         return points
 
-class ConvBlock1(nn.Sequential):
-    def __init__(self, in_ch, out_ch):
-        super(ConvBlock1,self).__init__()
-        conv = nn.Conv2d(in_ch, out_ch, 3, 1, 1, bias=False)
-        self.add_module('conv', conv)
-        self.add_module('norm', nn.BatchNorm2d(out_ch))
-        #self.add_module('swish', nn.SiLU())
-        self.add_module('lrelu', nn.LeakyReLU(0.2))
-
-class SinGenerator(nn.Sequential):
+class SinGenerator(nn.Module):
     def __init__(self, channels):
-        super(SinGenerator,self).__init__()      
-        self.add_module('head', ConvBlock1(3, channels[0]))        
-        self.add_module('main', nn.Sequential(OrderedDict([
-            ('b'+str(i), ConvBlock1(in_ch, out_ch))
-            for i, (in_ch, out_ch) in 
-            enumerate(zip(channels, channels[1:]))])))
-        self.add_module('tail', nn.Sequential(
+        super(SinGenerator,self).__init__()
+        self.trunk = nn.Sequential(OrderedDict([
+            ('head', ConvBlock(3, channels[0])),
+            ('main', nn.Sequential(OrderedDict([
+                ('b'+str(i), ConvBlock(in_ch, out_ch))
+                for i, (in_ch, out_ch) in 
+                enumerate(zip(channels, channels[1:]))])))
+        ]))
+        self.points = nn.Sequential(
             spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),
-            nn.Tanh(),
-        ))
+            nn.Tanh(),)
+        self.ratio = nn.Sequential(
+            spectral_norm(nn.Conv2d(channels[-1], 1, 3, 1, 1, bias=False)),
+            nn.Sigmoid())
 
+    def scale(self, t, size):
+        return F.interpolate(t, size=size, mode='bilinear', align_corners=True)
+
+    def forward(self, outline, size):
+        trunk = self.trunk(outline)
+        points = self.scale(self.points(trunk), size)
+        ratio = self.scale(self.ratio(trunk), size) * 0.1
+        return points, ratio
 
 class Generator(nn.Module):
     def __init__(self, config):
@@ -68,6 +71,10 @@ class Generator(nn.Module):
         self.points = SinGenerator(channels)
         #self.colors = SkipGenerator(channels)
     
-    def forward(self, outline, ratio=0.05):
-        res = self.points(outline) * ratio + outline * (1 - ratio)
+    def forward(self, baseline, outline):
+        size = baseline.size(-1)
+        #print(baseline.size(-1),  outline.size(-1))       
+        points, ratio = self.points(outline, size)
+        #print(points.shape, ratio.shape)
+        res = (1- ratio) * baseline + ratio * points
         return res, torch.ones_like(res)

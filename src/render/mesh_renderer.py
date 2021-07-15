@@ -25,7 +25,7 @@ class MeshPointsRenderer(torch.nn.Module):
         super(MeshPointsRenderer, self).__init__()
         self.opt = opt
         self.max_brightness = opt.raster_max_brightness        
-        size = opt.fast_outline_size
+        size = opt.fast_baseline_size
         self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
         self.renderer = None
     

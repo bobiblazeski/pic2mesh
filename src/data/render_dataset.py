@@ -36,7 +36,8 @@ class RenderDataset(torch.utils.data.Dataset):
         
         self.num_workers = config.num_workers
         self.pin_memory = config.pin_memory        
-        self.outline_size =  config.fast_outline_size
+        self.outline_size = config.fast_outline_size
+        self.baseline_size = config.fast_baseline_size
         self.geoaug_policy = config.geoaug_policy
 
         self.image_root = config.fast_render_root        
@@ -47,7 +48,8 @@ class RenderDataset(torch.utils.data.Dataset):
         blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
         points = torch.tensor(blueprint['points'])                
                        
-        self.points = self.scale(points, self.outline_size)                
+        self.outline = self.scale(points, self.outline_size)
+        self.baseline = self.scale(points, self.baseline_size)               
         
         self.transform = pyramid_transform(self.image_size, 
             self.image_mean, self.image_std)
@@ -60,10 +62,12 @@ class RenderDataset(torch.utils.data.Dataset):
         return len(self.img_ds)
     
     def __getitem__(self, idx):              
-        points = self.points[idx % self.points.size(0)]
+        baseline = self.baseline[idx % self.baseline.size(0)]
+        outline = self.outline[idx % self.outline.size(0)]
         idx_img = idx % len(self.img_ds)
         image, label = self.img_ds[idx_img]        
         res = self.transform(image)
         res['label'] = label
-        res['outline'] = GeoAugment(points, policy=self.geoaug_policy)         
+        res['outline'] = GeoAugment(outline, policy=self.geoaug_policy)  
+        res['baseline'] = GeoAugment(baseline, policy=self.geoaug_policy)        
         return res

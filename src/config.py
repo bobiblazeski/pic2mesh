@@ -120,7 +120,8 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
         
     
-    parser.add_argument('--fast_outline_size', type=int, default=128)
+    parser.add_argument('--fast_outline_size', type=int, default=8)
+    parser.add_argument('--fast_baseline_size', type=int, default=128)
     parser.add_argument('--fast_image_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')
     parser.add_argument('--fast_render_root',
@@ -144,6 +145,7 @@ def get_parser():
     parser.add_argument('--log_pad_value', help='Value for the padded pixels', type=int, default=0)
     parser.add_argument('--log_batch_interval', help='Image logging interval', type=int, default=250)
     parser.add_argument('--log_mesh_interval', help='Mesh export interval', type=int, default=20)
+    parser.add_argument('--log_render_interval', help='Image logging interval', type=int, default=100)
     
     # Losses    
     parser.add_argument('--mesh_edge_loss_weight', type=float, default=1.00, help='Mesh edge loss')    

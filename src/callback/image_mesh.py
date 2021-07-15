@@ -33,7 +33,9 @@ class ImageMesh(pl.callbacks.Callback):
         # generate images
         with torch.no_grad():
             pl_module.eval()
-            points, colors = pl_module.G(batch['outline'].to(pl_module.device), pl_module.ratio)
+            outline =batch['outline'].to(pl_module.device)
+            baseline =batch['baseline'].to(pl_module.device)
+            points, colors = pl_module.G(baseline, outline)
             renders = pl_module.R(points, colors)
             pl_module.train()
 
@@ -46,15 +48,7 @@ class ImageMesh(pl.callbacks.Callback):
                 if not os.path.exists(mesh_dir):
                     os.makedirs(mesh_dir)
                 file_path = os.path.join(mesh_dir, f'mesh_{trainer.current_epoch}_{trainer.global_step}.stl')
-                mesh.export(file_path)     
-                grid = torchvision.utils.make_grid(
-                    tensor=renders,
-                    nrow=self.nrow,
-                    padding=self.padding,                        
-                    pad_value=self.pad_value,
-                )
-                str_title = f"{pl_module.__class__.__name__}_images"
-                trainer.logger.experiment.add_image(str_title, grid, global_step=trainer.global_step)
+                mesh.export(file_path)                     
             except:
                 print('Exception', points.shape)
                 pass
