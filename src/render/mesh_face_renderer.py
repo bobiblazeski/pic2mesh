@@ -10,6 +10,7 @@ from pytorch3d.renderer import (
     FoVPerspectiveCameras,
     look_at_view_transform,
     PointLights,
+    DirectionalLights,
     RasterizationSettings,
     MeshRenderer, 
     MeshRasterizer,  
@@ -48,6 +49,9 @@ class MeshFaceRenderer(torch.nn.Module):
         )        
         lights = PointLights(device=device, 
                              location=[self.opt.lights_location])
+        lights = DirectionalLights(device=device, 
+              direction=[self.opt.lights_direction],
+              specular_color=[self.opt.specular_color])
         shader = SoftPhongShader(
             device=device, 
             cameras=cameras,

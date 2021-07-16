@@ -19,6 +19,13 @@ def get_parser():
                         default=[0.0, 0.0, 3.0],
                         help="Examples: -lights_location 0.0, -1.0, 3.0")
 
+    parser.add_argument('--lights_direction', nargs='+', type=float, 
+                        default=[0.0, 0.0, 3.0],
+                        help="Examples: -lights_location 0.0, -1.0, 3.0")        
+    parser.add_argument('--specular_color', nargs='+', type=float, 
+                        default=[0.1, 0.1, 0.1])                                
+                                        
+
     parser.add_argument('--raster_image_size', type=int, default=128,
                         help='Rasterizer image size')
     parser.add_argument('--raster_radius', type=float, default=0.01, 
