@@ -50,19 +50,15 @@ class SinGenerator(nn.Module):
         ]))
         self.points = nn.Sequential(
             spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),
-            nn.Tanh(),)
-        self.ratio = nn.Sequential(
-            spectral_norm(nn.Conv2d(channels[-1], 1, 3, 1, 1, bias=False)),
-            nn.Sigmoid())
+            nn.Tanh(),)        
 
     def scale(self, t, size):
         return F.interpolate(t, size=size, mode='bilinear', align_corners=True)
 
-    def forward(self, outline, size):
+    def forward(self, outline):
         trunk = self.trunk(outline)
-        points = self.scale(self.points(trunk), size)
-        ratio = self.scale(self.ratio(trunk), size) * 0.1
-        return points, ratio
+        points = self.points(trunk)        
+        return points
 
 class Generator(nn.Module):
     def __init__(self, config):
@@ -71,10 +67,8 @@ class Generator(nn.Module):
         self.points = SinGenerator(channels)
         #self.colors = SkipGenerator(channels)
     
-    def forward(self, baseline, outline):
-        size = baseline.size(-1)
+    def forward(self, baseline, ratio=1.0):
         #print(baseline.size(-1),  outline.size(-1))       
-        points, ratio = self.points(outline, size)
-        #print(points.shape, ratio.shape)
-        res = (1- ratio) * baseline + ratio * points
+        points = self.points(baseline) 
+        res =  baseline * (1-ratio) + points * ratio     
         return res, torch.ones_like(res)

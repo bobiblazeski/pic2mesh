@@ -25,6 +25,10 @@ class MeshPointsRenderer(torch.nn.Module):
     def __init__(self, opt):    
         super(MeshPointsRenderer, self).__init__()
         self.opt = opt
+        self.viewpoint_distance = opt.viewpoint_distance, 
+        self.viewpoint_elevation = opt.viewpoint_elevation, 
+        self.viewpoint_azimuth = opt.viewpoint_azimuth
+
         self.max_brightness = opt.raster_max_brightness        
         size = opt.fast_baseline_size
         self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
@@ -32,10 +36,10 @@ class MeshPointsRenderer(torch.nn.Module):
     
     def setup(self, device):                    
         R, T = look_at_view_transform(
-            self.opt.viewpoint_distance, 
-            self.opt.viewpoint_elevation, 
-            self.opt.viewpoint_azimuth, 
-            device=device)
+            self.viewpoint_distance, 
+            self.viewpoint_elevation, 
+            self.viewpoint_azimuth, 
+            device=device)        
         cameras = FoVPerspectiveCameras(
             device=device, R=R, T=T)
         raster_settings = RasterizationSettings(

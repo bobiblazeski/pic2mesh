@@ -26,17 +26,15 @@ class ImageMesh(pl.callbacks.Callback):
         
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         # show images only every log_batch_interval batches
-        if trainer.batch_idx == 0 or (trainer.batch_idx + 1) % self.log_batch_interval != 0:  # type: ignore[attr-defined]
+        if (trainer.batch_idx % self.log_batch_interval) != 0:  # type: ignore[attr-defined]
             return
         batch = next(iter(trainer.datamodule.train_dataloader()))
         
         # generate images
         with torch.no_grad():
             pl_module.eval()
-            outline =batch['outline'].to(pl_module.device)
-            baseline =batch['baseline'].to(pl_module.device)
-            points, colors = pl_module.G(baseline, outline)
-            renders = pl_module.R(points, colors)
+            baseline= batch.to(pl_module.device)
+            points, _ = pl_module.G(baseline)            
             pl_module.train()
 
             try:            
