@@ -55,15 +55,15 @@ def vertex_angle_maps(faces):
 
 class VertexNormals(torch.nn.Module):
     
-    def __init__(self, opt, load=True):
+    def __init__(self, opt, load=True, size=None):
         super().__init__()
-        self.size = opt.adversarial_data_patch_size
+        self.size = size or opt.adversarial_data_patch_size
         self.path = os.path.join(opt.data_dir, 
             'trimap/trimap_{}.pth'.format(self.size))
         if load and os.path.exists(self.path):
             trimap = torch.load(self.path)
         else:
-            print('Creating trimap this might take long.')
+            print('Creating trimap this might take long time.')
             trimap = self.make_trimap(self.size)
             torch.save(trimap, self.path)
         self.assign_trimap(trimap)
