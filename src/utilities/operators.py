@@ -1,6 +1,7 @@
 # pyright: reportMissingImports=false
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 def make_laplacian(n):
     if n == 3:
@@ -71,3 +72,27 @@ def make_laplacian(n):
     res.requires_grad_(False)
     res.weight.data = weights
     return res
+
+def mean_distance(pts):    
+    def get_distance(pts, hood):
+        zeros = [[0., 0.],
+                 [0., 0.],]
+
+        weights = torch.tensor([
+            [hood, zeros, zeros],
+            [zeros, hood, zeros],
+            [zeros, zeros, hood],
+        ]).to(pts.device)
+        dist = F.conv2d(pts, weights) ** 2
+        dist = dist.sum(dim=1)    
+        dist = torch.sqrt(dist)
+        dist = dist.reshape(pts.size(0), -1)
+        return dist.mean(1)
+    
+    v_hood = [[+1., +0.],
+              [-1., +0.]]
+    h_hood = [[+1., -1.],
+              [+0., +0.]]
+    v_dist = get_distance(pts, v_hood)
+    h_dist = get_distance(pts, h_hood)
+    return (v_dist + h_dist) / 2    

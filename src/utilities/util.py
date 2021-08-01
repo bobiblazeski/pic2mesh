@@ -2,7 +2,7 @@
 import numpy as np
 import torch
 
-from math import sin, cos, pi
+from math import sin, cos, pi, sqrt
 from PIL import Image
 
 from matplotlib import cm
@@ -333,6 +333,10 @@ def vertex_tri_maps(faces):
 
 def grid_to_list(t):
     return t.reshape(t.size(0), 3, -1).permute(0, 2, 1)
+
+def list_to_grid(t):
+    w = int(sqrt(t.size(1)))
+    return t.reshape(-1, w, w, 3).permute(0, 3, 1, 2)
 
 # def make_faces(w, h):
 #     mesh_indices = []

@@ -70,7 +70,7 @@ class MeshPointsRenderer(torch.nn.Module):
             shader=shader,
         )
     
-    def __call__(self, points, colors, mean=None, std=None):
+    def __call__(self, points, colors, mean=None, std=None, grayscale=True):
         assert len(points.shape) == 4 and points.shape[1] == 3
         
         points, colors = grid_to_list(points), grid_to_list(colors)
@@ -83,7 +83,9 @@ class MeshPointsRenderer(torch.nn.Module):
         mesh = Meshes(verts=points, faces=faces, textures=textures)
         r_images = self.renderer(mesh)        
         r_images = r_images.permute(0, 3, 1, 2).contiguous()
-        r_images = r_images[:, :3, :, :].mean(dim=1, keepdim=True)
+        r_images = r_images[:, :3, :, :]
+        if grayscale:
+            r_images = r_images.mean(dim=1, keepdim=True)
         if mean and std:           
             r_images = (r_images - mean) / std
         return r_images
