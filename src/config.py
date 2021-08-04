@@ -115,6 +115,11 @@ def get_parser():
                         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024/')
     parser.add_argument('--data_mask_dir', help='Image masks directory', 
                         default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
+
+    parser.add_argument('--data_grid_dir',
+                        default='/home/bobi/Desktop/pic2mesh/data/stl_grid')                        
+    parser.add_argument('--data_mesh_dir',
+                        default='/home/bobi/Desktop/pic2mesh/data/stl_mesh') 
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
     parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)        
@@ -125,7 +130,8 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--shuffle', dest='shuffle', 
                         default=True, type=lambda x: bool(strtobool(x)))
-        
+
+    parser.add_argument('--stl_offset',type=float,help='Mesh scaling offset',default=0.02)
     
     parser.add_argument('--fast_outline_size', type=int, default=8)
     parser.add_argument('--fast_baseline_size', type=int, default=128)
