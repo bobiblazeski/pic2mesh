@@ -22,7 +22,8 @@ class SinGenerator(nn.Module):
         ]))
         self.points = nn.Sequential(
             spectral_norm(nn.Conv2d(channels[-1], 1, 3, 1, 1, bias=False)),
-            nn.Sigmoid(),)      
+            #nn.Sigmoid(),)
+            nn.Tanh(),)
 
     def scale(self, t, size):
         return F.interpolate(t, size=size, mode='bilinear', align_corners=True)
@@ -46,10 +47,11 @@ class Generator(nn.Module):
         
     def forward(self, points, normals):
         #print(baseline.size(-1),  outline.size(-1))       
-        dist = mean_distance(points)
+        dist = mean_distance(points).reshape(-1, 1, 1, 1)
         magnitudes = self.points(points)        
-        magnitudes = magnitudes - self.get_means(magnitudes)
-        magnitudes = magnitudes * dist.reshape(-1, 1, 1, 1)
+        magnitudes = magnitudes #- self.get_means(magnitudes)
+        magnitudes = magnitudes * dist# * 10
 
         res = points + normals * magnitudes
+        #res = normals * magnitudes
         return res, torch.ones_like(res)
