@@ -65,15 +65,11 @@ class FullDataset(torch.utils.data.Dataset):
         self.mask_size = config.mask_size
         self.image_mean = config.fast_image_mean
         self.image_std = config.fast_image_std
+        self.blends_no = config.data_blends_no
         
         self.data_grid_dir = config.data_grid_dir
         self.data_mesh_dir = config.data_mesh_dir
         
-        
-        blueprint = np.load(os.path.join(config.data_dir, config.blueprint))
-        points = torch.tensor(blueprint['points'])                
-                       
-        self.points = self.scale(points, self.outline_size)                
         
         self.transform = pyramid_transform(self.image_size, self.mask_size, 
                                            self.image_mean, self.image_std)
@@ -81,12 +77,13 @@ class FullDataset(torch.utils.data.Dataset):
         
         self.grid_files = [os.path.join(self.data_grid_dir, f) 
                            for f in os.listdir(self.data_grid_dir)]
+        self.grid_files.sort()
         self.mesh_files = [os.path.join(self.data_mesh_dir, f) 
                            for f in os.listdir(self.data_mesh_dir)]
         self.device = torch.device('cpu')
         
     def scale(self, t, size):
-        return F.interpolate(t, size=size, mode='bilinear', align_corners=True)
+        return F.interpolate(t[None], size=size, mode='bilinear', align_corners=True)[0]
         
     def __len__(self):
         return len(self.img_ds)
@@ -104,12 +101,29 @@ class FullDataset(torch.utils.data.Dataset):
         idx_grid = idx % len(self.grid_files)
         grid_file =  self.grid_files[idx_grid]
         grid = torch.load(grid_file)
-        vertices, normals = grid['vertices'][None], grid['normals'][None]
+        vertices = grid['vertices']        
         vertices = self.scale(vertices, self.baseline_size)
-        normals = self.scale(normals, self.baseline_size)
-        normals = F.normalize(normals, dim=1)
-        return vertices[0], normals[0]
-        
+#         normals = grid['normals']
+#         normals = self.scale(normals, self.baseline_size)
+#         normals = F.normalize(normals, dim=0)
+        outline = self.scale(vertices, self.outline_size)
+        return {
+            'grid_baseline': vertices, 
+            #'grid_normals': normals, 
+            'grid_outline': outline, 
+        }
+    
+    def get_blends(self, _):
+        verts = torch.stack([torch.load(self.grid_files[i])['vertices'] 
+             for i in torch.randint(0, len(self.grid_files), (self.blends_no,))])
+        q = F.normalize(torch.rand(self.blends_no), p=1, dim=0).reshape(-1, 1, 1, 1)
+        blends = (verts * q).sum(dim=0)
+        blend_baseline = self.scale(blends, self.baseline_size)
+        blend_outline = self.scale(blends, self.outline_size)
+        return {
+            'blend_baseline': blend_baseline,
+            'blend_outline': blend_outline,
+        }
     
     def __getitem__(self, idx):              
         # Image
@@ -118,13 +132,12 @@ class FullDataset(torch.utils.data.Dataset):
         mask_path =  self.img_ds.imgs[0][0].replace(self.image_root, self.mask_root)
         mask = torch.load(mask_path.replace('.png', '.pth'))
         res = self.transform(image, mask)        
-        
-        # Mesh        
         res['samples'] = self.get_samples(idx)
         
-        vertices, normals = self.get_grid(idx)
-        res['vertices'] = vertices
-        res['normals'] = normals        
-        #points = self.points[idx % self.points.size(0)]        
-        #res['outline'] = GeoAugment(points, policy=self.geoaug_policy)                 
+        grid =  self.get_grid(idx)
+        for key in grid.keys():  res[key] = grid[key]
+            
+        blend =  self.get_blends(idx)
+        for key in blend.keys():  res[key] = blend[key]      
+        
         return res

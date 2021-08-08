@@ -123,8 +123,9 @@ def get_parser():
     parser.add_argument('--data_image_size', help='Original image size', type=int, default=1024)
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
     parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)        
-    parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)
-    
+    parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)    
+    parser.add_argument('--data_blends_no', help='How many grid to blend', type=int, default=4)
+
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--pin_memory', dest='pin_memory', 
                         default=True, type=lambda x: bool(strtobool(x)))
