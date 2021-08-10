@@ -73,20 +73,27 @@ class FullDataset(torch.utils.data.Dataset):
         
         self.transform = pyramid_transform(self.image_size, self.mask_size, 
                                            self.image_mean, self.image_std)
-        self.img_ds = ImageFolder(self.image_root)
+        #self.img_ds = ImageFolder(self.image_root)
         
         self.grid_files = [os.path.join(self.data_grid_dir, f) 
                            for f in os.listdir(self.data_grid_dir)]
         self.grid_files.sort()
+        grid_verts = [torch.load(f)['vertices']for f in  self.grid_files]
+        self.grid_baselines = [
+            self.scale(v, self.baseline_size) for v in grid_verts]
+        self.grid_outlines = [
+            self.scale(v, self.outline_size) for v in grid_verts]
+        
         self.mesh_files = [os.path.join(self.data_mesh_dir, f) 
                            for f in os.listdir(self.data_mesh_dir)]
         self.device = torch.device('cpu')
+        print('Dataset setup finished')
         
     def scale(self, t, size):
         return F.interpolate(t[None], size=size, mode='bilinear', align_corners=True)[0]
         
     def __len__(self):
-        return len(self.img_ds)
+        return len(self.mesh_files)
     
     def get_samples(self, idx):
         idx_mesh = idx % len(self.mesh_files)
@@ -94,45 +101,37 @@ class FullDataset(torch.utils.data.Dataset):
         verts, faces = scale_geometry(mesh_file, self.device, offset=self.stl_offset)
         trg_mesh = Meshes(verts=[verts], faces=[faces])
         samples = sample_points_from_meshes(trg_mesh, self.baseline_size ** 2)[0]
-        samples = samples.t().reshape(3, self.baseline_size, self.baseline_size)
+        #samples = samples.t().reshape(3, self.baseline_size, self.baseline_size)
         return samples.contiguous()
     
     def get_grid(self, idx):
         idx_grid = idx % len(self.grid_files)
-        grid_file =  self.grid_files[idx_grid]
-        grid = torch.load(grid_file)
-        vertices = grid['vertices']        
-        vertices = self.scale(vertices, self.baseline_size)
-#         normals = grid['normals']
-#         normals = self.scale(normals, self.baseline_size)
-#         normals = F.normalize(normals, dim=0)
-        outline = self.scale(vertices, self.outline_size)
         return {
-            'grid_baseline': vertices, 
-            #'grid_normals': normals, 
-            'grid_outline': outline, 
+            'grid_baseline': self.grid_baselines[idx_grid],             
+            'grid_outline':  self.grid_outlines[idx_grid],
         }
     
     def get_blends(self, _):
-        verts = torch.stack([torch.load(self.grid_files[i])['vertices'] 
+        baselines = torch.stack([self.grid_baselines[i]
              for i in torch.randint(0, len(self.grid_files), (self.blends_no,))])
-        q = F.normalize(torch.rand(self.blends_no), p=1, dim=0).reshape(-1, 1, 1, 1)
-        blends = (verts * q).sum(dim=0)
-        blend_baseline = self.scale(blends, self.baseline_size)
-        blend_outline = self.scale(blends, self.outline_size)
+        outlines = torch.stack([self.grid_outlines[i]
+             for i in torch.randint(0, len(self.grid_files), (self.blends_no,))])
+        q = F.normalize(torch.rand(self.blends_no), p=1, dim=0).reshape(-1, 1, 1, 1)        
         return {
-            'blend_baseline': blend_baseline,
-            'blend_outline': blend_outline,
+            'blend_baseline': (baselines * q).sum(dim=0),
+            'blend_outline':  (outlines * q).sum(dim=0),
         }
     
     def __getitem__(self, idx):              
+        res = {}
         # Image
-        idx_img = idx % len(self.img_ds)
-        image, _ = self.img_ds[idx_img]
-        mask_path =  self.img_ds.imgs[0][0].replace(self.image_root, self.mask_root)
-        mask = torch.load(mask_path.replace('.png', '.pth'))
-        res = self.transform(image, mask)        
-        res['samples'] = self.get_samples(idx)
+        # idx_img = idx % len(self.img_ds)
+        # image, _ = self.img_ds[idx_img]
+        # mask_path =  self.img_ds.imgs[0][0].replace(self.image_root, self.mask_root)
+        # mask = torch.load(mask_path.replace('.png', '.pth'))
+        # res = self.transform(image, mask)
+
+        #res['samples'] = self.get_samples(idx)
         
         grid =  self.get_grid(idx)
         for key in grid.keys():  res[key] = grid[key]

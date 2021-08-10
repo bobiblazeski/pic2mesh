@@ -55,7 +55,7 @@ def get_parser():
     parser.add_argument('--D_use_spectral_norm', dest='D_use_spectral_norm', 
                         default=False, type=lambda x: bool(strtobool(x)))
     parser.add_argument('--D_in_ch', type=int, help='Discriminator input channels: 3 RGB, 1 Greyscale', default=1)
-    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)            
+    parser.add_argument('--D_out_ch',type=int, help='Generator output channels', default=256)             
 
     # Generator
     parser.add_argument('--G_in_ch', type=int, help='Generator input channels', default=3) # 3-points, 6+normals
@@ -69,7 +69,7 @@ def get_parser():
     parser.add_argument('--fast_generator_channels', nargs='+', type=int, 
                         default=[ 128, 128, 256, 256])
     parser.add_argument('--fast_discriminator_channels', nargs='+', type=int, 
-                        default=[ 1, 128, 128, 128])
+                        default=[ 3, 128, 128, 128])
     
     #networks hyper parameters:
     parser.add_argument('--nfc', type=int, default=128)

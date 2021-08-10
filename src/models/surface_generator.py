@@ -21,9 +21,9 @@ class UpConvBlock(nn.Sequential):
         #self.add_module('swish', nn.SiLU())
         self.add_module('lrelu', nn.LeakyReLU(0.2))
         
-class SinGenerator(nn.Module):
+class SurfaceGenerator(nn.Module):
     def __init__(self, channels):
-        super(SinGenerator,self).__init__()
+        super(SurfaceGenerator,self).__init__()
         self.trunk = nn.Sequential(OrderedDict([
             ('head', ConvBlock(3, channels[0])),
             ('main', nn.Sequential(OrderedDict([
@@ -32,7 +32,7 @@ class SinGenerator(nn.Module):
                 enumerate(zip(channels, channels[1:]))])))
         ]))
         self.points = nn.Sequential(
-            spectral_norm(nn.Conv2d(channels[-1], 1, 3, 1, 1, bias=False)),
+            spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),
             #nn.Sigmoid(),)
             nn.Tanh(),)
 
@@ -43,13 +43,13 @@ class SinGenerator(nn.Module):
         trunk = self.trunk(outline)
         points = self.points(trunk)        
         return points
-    
+
 
 class Generator(nn.Module):
     def __init__(self, config):
         super(Generator, self).__init__()                      
         channels =  config.fast_generator_channels 
-        self.points = SinGenerator(channels)
+        self.points = SurfaceGenerator(channels)
         #self.colors = SkipGenerator(channels)
     
     def forward(self, outline):
