@@ -124,7 +124,8 @@ def get_parser():
     parser.add_argument('--data_mask_size', help='Mask size', type=int, default=512)
     parser.add_argument('--data_image_resized', help='Image resized', type=int, default=256)        
     parser.add_argument('--data_style_img', help='Style image size', type=int, default=192)    
-    parser.add_argument('--data_blends_no', help='How many grid to blend', type=int, default=4)
+    parser.add_argument('--data_blends_no', help='How many grid files to blend', type=int, default=4)
+    parser.add_argument('--data_blends_total', help='Length of the blend dataset', type=int, default=100000)
 
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--pin_memory', dest='pin_memory', 
@@ -134,7 +135,7 @@ def get_parser():
 
     parser.add_argument('--stl_offset',type=float,help='Mesh scaling offset',default=0.02)
     
-    parser.add_argument('--fast_outline_size', type=int, default=8)
+    parser.add_argument('--fast_outline_size', type=int, default=32)
     parser.add_argument('--fast_baseline_size', type=int, default=128)
     parser.add_argument('--fast_image_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024')

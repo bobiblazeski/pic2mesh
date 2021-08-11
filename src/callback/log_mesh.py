@@ -33,30 +33,22 @@ class LogMesh(pl.callbacks.Callback):
         # generate images
         with torch.no_grad():
             pl_module.eval()
-            grid_vertices = pl_module.G(batch['grid_outline'].to(pl_module.device)) 
-            blend_vertices = pl_module.G(batch['blend_outline'].to(pl_module.device))            
+            vertices = pl_module.G(batch['outline'].to(pl_module.device)) 
             pl_module.train()
 
             try:            
                 if self.faces is None:
-                    self.faces = make_faces(grid_vertices.size(-2), grid_vertices.size(-1))
-                vertices = grid_to_list(grid_vertices)[0].cpu().numpy()
+                    self.faces = make_faces(vertices.size(-2), vertices.size(-1))
+                vertices = grid_to_list(vertices)[0].cpu().numpy()
                 mesh = trimesh.Trimesh(vertices=vertices, faces=self.faces)
                 mesh_dir = os.path.join(trainer.log_dir, 'mesh')
                 if not os.path.exists(mesh_dir):
                     os.makedirs(mesh_dir)
-                file_path = os.path.join(mesh_dir, f'grid_vertices_{trainer.current_epoch}_{trainer.global_step}.stl')
+                file_path = os.path.join(mesh_dir, f'vertices_{trainer.current_epoch}_{trainer.global_step}.stl')
                 mesh.export(file_path)
-
-                vertices = grid_to_list(blend_vertices)[0].cpu().numpy()
-                mesh = trimesh.Trimesh(vertices=vertices, faces=self.faces)
-                mesh_dir = os.path.join(trainer.log_dir, 'mesh')
-                if not os.path.exists(mesh_dir):
-                    os.makedirs(mesh_dir)
-                file_path = os.path.join(mesh_dir, f'blend_vertices_{trainer.current_epoch}_{trainer.global_step}.stl')
-                mesh.export(file_path)
+                
             except:
-                print('Exception', grid_vertices.shape)
+                print('Exception', vertices.shape)
                 pass
         
     

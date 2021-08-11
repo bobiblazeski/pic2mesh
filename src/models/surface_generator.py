@@ -27,9 +27,10 @@ class SurfaceGenerator(nn.Module):
         self.trunk = nn.Sequential(OrderedDict([
             ('head', ConvBlock(3, channels[0])),
             ('main', nn.Sequential(OrderedDict([
-                ('b'+str(i), UpConvBlock(in_ch, out_ch))
-                for i, (in_ch, out_ch) in 
-                enumerate(zip(channels, channels[1:]))])))
+                ('b'+str(i), ConvBlock(in_ch, out_ch) 
+                    if i == 0 else UpConvBlock(in_ch, out_ch))
+                    for i, (in_ch, out_ch) in 
+                    enumerate(zip(channels, channels[1:]))])))
         ]))
         self.points = nn.Sequential(
             spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),
