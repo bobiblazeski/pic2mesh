@@ -13,7 +13,7 @@ from src.utilities.operators import mean_distance
 class UpConvBlock(nn.Sequential):
     def __init__(self, in_ch, out_ch):
         super(UpConvBlock,self).__init__()
-        self.add_module('upsample', nn.Upsample(scale_factor=2, 
+        self.add_module('upsample', nn.Upsample(scale_factor=4,
             mode='bilinear', align_corners=True))
         conv = nn.Conv2d(in_ch, out_ch, 3, 1, 1, bias=False)
         self.add_module('conv', conv)
@@ -25,10 +25,9 @@ class SurfaceGenerator(nn.Module):
     def __init__(self, channels):
         super(SurfaceGenerator,self).__init__()
         self.trunk = nn.Sequential(OrderedDict([
-            ('head', ConvBlock(3, channels[0])),
+            ('head', UpConvBlock(3, channels[0])),
             ('main', nn.Sequential(OrderedDict([
-                ('b'+str(i), ConvBlock(in_ch, out_ch) 
-                    if i == 0 else UpConvBlock(in_ch, out_ch))
+                ('b'+str(i), ConvBlock(in_ch, out_ch))
                     for i, (in_ch, out_ch) in 
                     enumerate(zip(channels, channels[1:]))])))
         ]))

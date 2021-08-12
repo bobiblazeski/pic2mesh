@@ -58,7 +58,7 @@ class Classifier(nn.Sequential):
         self.add_module('avgpool', nn.AdaptiveAvgPool2d((1, 1)))
         self.add_module('flatten', nn.Flatten())
         self.add_module('linear', nn.Linear(out_ch, 1))
-        self.add_module('sigmoid', nn.Sigmoid())
+        #self.add_module('sigmoid', nn.Sigmoid())
 
 class Discriminator(nn.Module):
     def __init__(self, opt):  
@@ -66,11 +66,11 @@ class Discriminator(nn.Module):
         channels = opt.fast_discriminator_channels
         self.encoder = Encoder(channels)
         self.classifier = Classifier(channels[-1])        
-        self.decoder = Decoder(list(reversed(channels)))
+        #self.decoder = Decoder(list(reversed(channels)))
         
     def forward(self, images, is_real):
         encodings = self.encoder(images)
         labels = self.classifier(encodings)        
-        decodings = self.decoder(encodings) if is_real else None
-        return labels, decodings
+        #decodings = self.decoder(encodings) if is_real else None
+        return labels, None#decodings
         
