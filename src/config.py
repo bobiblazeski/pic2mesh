@@ -67,7 +67,7 @@ def get_parser():
                         default=True, type=lambda x: bool(strtobool(x)))
 
     parser.add_argument('--fast_generator_channels', nargs='+', type=int, 
-                        default=[ 128, 128, 128, 128])
+                        default=[ 128, 128, 256, 256])
     parser.add_argument('--fast_discriminator_channels', nargs='+', type=int, 
                         default=[ 3, 256, 256])
     
