@@ -1,46 +1,53 @@
 # pyright: reportMissingImports=false
+import copy
+
 import torch
 import torch.nn.functional as F
 
 
-def GeoAugment(x, policy='', channels_first=True):
+def GeoAugment(x, policy='', channels_first=True, ts=None):
+    ts = copy.deepcopy(ts) if ts is not None else {}
     if policy:
         if not channels_first:
             x = x.permute(0, 3, 1, 2)
         for p in policy.split(','):
-            for f in AUGMENT_FNS[p]:
-                x = f(x)
+            f = AUGMENT_FNS[p]
+            change =ts[p] if p in ts else None
+            x, t = f(x, change=change)
+            ts[p] = t
         if not channels_first:
             x = x.permute(0, 2, 3, 1)
         x = x.contiguous()
-    return x
+    return x, ts
 
-def rand_translation(x, ratio=0.125):
-    if len(x.shape) == 4:
-        bs = x.size(0)
-        translations = torch.FloatTensor(bs, 3).uniform_(-ratio, ratio)    
-        translations = translations.reshape(bs, 3, 1, 1)
-    elif len(x.shape) == 3:
-        translations = torch.FloatTensor(3).uniform_(-ratio, ratio)    
-        translations = translations.reshape(3, 1, 1)
-    else:
-        translations = torch.FloatTensor(3).uniform_(-ratio, ratio)    
-    return x + translations.to(x.device)
+def rand_translation(x, ratio=0.25, change=None):
+    if change is None:
+        if len(x.shape) == 4:
+            bs = x.size(0)
+            change = torch.FloatTensor(bs, 3).uniform_(-ratio, ratio)
+            change = change.reshape(bs, 3, 1, 1)
+        elif len(x.shape) == 3:
+            change = torch.FloatTensor(3).uniform_(-ratio, ratio)
+            change = change.reshape(3, 1, 1)
+        else:
+            change = torch.FloatTensor(3).uniform_(-ratio, ratio)
+    return x + change.to(x.device), change
 
-def rand_scaling(x, ratio=0.2):
-    if len(x.shape) == 4:    
-        bs = x.size(0)
-        scalings = torch.FloatTensor(bs, 3).uniform_(1-ratio, 1+ratio)
-        scalings = scalings.reshape(bs, 3, 1, 1).to(x.device)
-    elif len(x.shape) == 3:
-        scalings = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)
-        scalings = scalings.reshape(3, 1, 1).to(x.device)
-    else:
-        scalings = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)      
-    return x * scalings.to(x.device)
+def rand_scaling(x, ratio=0.25, change=None):
+    if change is None:
+        if len(x.shape) == 4:    
+            bs = x.size(0)
+            change = torch.FloatTensor(bs, 3).uniform_(1-ratio, 1+ratio)
+            change = change.reshape(bs, 3, 1, 1).to(x.device)
+        elif len(x.shape) == 3:
+            change = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)
+            change = change.reshape(3, 1, 1).to(x.device)
+        else:
+            change = torch.FloatTensor(3).uniform_(1-ratio, 1+ratio)
+    return x * change.to(x.device), change
 
 
 AUGMENT_FNS = {
-    'scaling': [rand_scaling],
-    'translation': [rand_translation],    
+    'scaling': rand_scaling,
+    'translation': rand_translation,
 }

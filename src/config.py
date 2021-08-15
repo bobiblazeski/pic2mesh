@@ -115,6 +115,8 @@ def get_parser():
                         default='/home/bobi/Desktop/db/ffhq-dataset/images1024x1024/')
     parser.add_argument('--data_mask_dir', help='Image masks directory', 
                         default='/home/bobi/Desktop/face-parsing.PyTorch/res/masks')
+    parser.add_argument('--data_renders_dir', help='Stl renders directory', 
+                        default='/home/bobi/Desktop/pic2mesh/data/augmented/renders')
 
     parser.add_argument('--data_grid_dir',
                         default='/home/bobi/Desktop/pic2mesh/data/stl_grid')                        
