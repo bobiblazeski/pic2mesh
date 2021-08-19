@@ -15,6 +15,10 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
+from src.utilities.util import (
+    grid_to_list,
+    list_to_grid,
+)
 def pyramid_transform(img_size, mean=0, std=1):
     transform = Compose([            
         Resize([img_size, img_size]),
@@ -43,17 +47,28 @@ class SampleRenderDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.img_ds)
     
+    def scale(self, t, size):
+        return F.interpolate(t, size=size, mode='bilinear', align_corners=True)
+
     def get_samples(self, idx):
         f =  self.img_ds.imgs[idx][0]
         f = f.replace('renders', 'samples').replace('.png', '.pth')
-        return torch.load(f)
+        samples = list_to_grid(torch.load(f)[None])        
+        return grid_to_list(self.scale(samples, self.image_size))[0]
+    
+    def get_grid(self, idx):
+        f =  self.img_ds.imgs[idx][0]
+        f = f.replace('renders', 'grid').replace('.png', '.pth')
+        grid = list_to_grid(torch.load(f)[None])        
+        return self.scale(grid, self.image_size)[0]
    
     def __getitem__(self, idx):              
         res = {}
         image, label = self.img_ds[idx]
         res['image'] =  image
         res['label'] =  label
-        res['samples'] =  self.get_samples(idx)        
+        res['samples'] =  self.get_samples(idx)
+        res['grid'] =  self.get_grid(idx)        
         return res
 
 class SampleRenderDataModule(pl.LightningDataModule):
