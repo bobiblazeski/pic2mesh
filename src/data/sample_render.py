@@ -68,7 +68,7 @@ class SampleRenderDataset(torch.utils.data.Dataset):
         image, label = self.img_ds[idx]
         res['image'] =  image
         res['label'] =  label
-        res['samples'] =  self.get_samples(idx)
+        #res['samples'] =  self.get_samples(idx)
         res['grid'] =  self.get_grid(idx)        
         return res
 

@@ -26,24 +26,27 @@ class Stylist(nn.Sequential):
 
 class Synthesis(nn.Module):
     def __init__(self, config):        
-        super(Synthesis,self).__init__()
+        super(Synthesis,self).__init__()        
         channels = config.synthesis_channels        
-        self.input = ConstantInput(config.const_input_file, config.grid_size)
-        self.head = StyledConv2d(3, channels[0], config.style_dim, 3)
-        self.trunk = nn.Sequential(OrderedDict([
-                ('b'+str(i), ConvBlock(in_ch, out_ch))
-                    for i, (in_ch, out_ch) in 
-                    enumerate(zip(channels, channels[1:]))]))
+        self.input = ConstantInput(config.initial_input_file,
+            config.grid_size, config.initial_input_fixed)
+        self.head = StyledConv2d(3, channels[0], config.style_dim, 3)              
+        self.trunk = nn.ModuleList([
+            StyledConv2d(in_ch, out_ch, config.style_dim, 3)
+            for i, (in_ch, out_ch) in
+            enumerate(zip(channels, channels[1:]))
+        ])
         self.tail = nn.Sequential(
             spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),            
             nn.Tanh(),)
 
     def forward(self, style):
         x = self.input(style)        
-        x = self.head(x, style)        
-        x = self.trunk(x)        
+        x = self.head(x, style) 
+        for layer in self.trunk:
+            x = layer(x, style)        
         x = self.tail(x)        
-        return x
+        return x        
 
 class StyleGenerator(nn.Module):
     def __init__(self, config):        

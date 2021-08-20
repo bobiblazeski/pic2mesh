@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ConstantInput(nn.Module):
-    def __init__(self, file, size, fixed=True):                
+    def __init__(self, file, size, fixed):                
         super().__init__()
         t = torch.load(file)
         t = F.interpolate(t, size=size, mode='bilinear', align_corners=True)

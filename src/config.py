@@ -71,7 +71,9 @@ def get_parser():
     parser.add_argument('--fast_discriminator_channels', nargs='+', type=int, 
                         default=[ 3, 256, 256])
 
-    parser.add_argument('--const_input_file', default='./data/mean_face_256.pth')
+    parser.add_argument('--initial_input_file', default='./data/mean_face_256.pth')
+    parser.add_argument('--initial_input_fixed', default=True, type=lambda x: bool(strtobool(x)))
+
     parser.add_argument('--grid_size', type=int, default=32)
     parser.add_argument('--style_dim', type=int, default=256)
     parser.add_argument('--synthesis_channels', nargs='+', type=int, 
