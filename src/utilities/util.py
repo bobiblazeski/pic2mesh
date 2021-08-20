@@ -332,11 +332,22 @@ def vertex_tri_maps(faces):
     return vert_tri_indices, vert_tri_weights.unsqueeze(dim=-1)[None]
 
 def grid_to_list(t):
-    return t.reshape(t.size(0), 3, -1).permute(0, 2, 1)
+    ls = len(t.shape)
+    if ls == 3:
+        return t.reshape(3, -1).permute(1, 0)
+    elif ls == 4:
+        return t.reshape(t.size(0), 3, -1).permute(0, 2, 1)
+    raise 'Not implemented for shapes other than 3 & 4'
 
 def list_to_grid(t):
-    w = int(sqrt(t.size(1)))
-    return t.reshape(-1, w, w, 3).permute(0, 3, 1, 2)
+    ls = len(t.shape)
+    if ls == 2:
+        w = int(sqrt(t.size(0)))
+        return t.reshape(w, w, 3).permute(2, 0, 1)
+    elif ls == 3:
+        w = int(sqrt(t.size(1)))
+        return t.reshape(-1, w, w, 3).permute(0, 3, 1, 2)
+    raise 'Not implemented for shapes other than 2 & 3'
 
 # def make_faces(w, h):
 #     mesh_indices = []

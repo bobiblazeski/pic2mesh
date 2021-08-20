@@ -39,6 +39,7 @@ class SampleRenderDataset(torch.utils.data.Dataset):
         self.image_mean = config.fast_image_mean
         self.image_std = config.fast_image_std
         self.image_size = config.fast_image_size
+        self.grid_size = config.grid_size
                 
         self.transform = pyramid_transform(self.image_size, 
                                            self.image_mean, self.image_std)
@@ -54,13 +55,13 @@ class SampleRenderDataset(torch.utils.data.Dataset):
         f =  self.img_ds.imgs[idx][0]
         f = f.replace('renders', 'samples').replace('.png', '.pth')
         samples = list_to_grid(torch.load(f)[None])        
-        return grid_to_list(self.scale(samples, self.image_size))[0]
+        return grid_to_list(self.scale(samples, self.grid_size))[0]
     
     def get_grid(self, idx):
         f =  self.img_ds.imgs[idx][0]
         f = f.replace('renders', 'grid').replace('.png', '.pth')
         grid = list_to_grid(torch.load(f)[None])        
-        return self.scale(grid, self.image_size)[0]
+        return self.scale(grid, self.grid_size)[0]
    
     def __getitem__(self, idx):              
         res = {}

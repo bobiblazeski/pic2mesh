@@ -70,7 +70,15 @@ def get_parser():
                         default=[ 128, 128, 256, 256])
     parser.add_argument('--fast_discriminator_channels', nargs='+', type=int, 
                         default=[ 3, 256, 256])
-    
+
+    parser.add_argument('--const_input_file', default='./data/mean_face_256.pth')
+    parser.add_argument('--grid_size', type=int, default=32)
+    parser.add_argument('--style_dim', type=int, default=256)
+    parser.add_argument('--synthesis_channels', nargs='+', type=int, 
+                        default=[ 256, 256, 256, 256])
+    parser.add_argument('--stylist_channels', nargs='+', type=int, 
+                        default=[ 1, 256, 256, 256])
+     
     #networks hyper parameters:
     parser.add_argument('--nfc', type=int, default=128)
     parser.add_argument('--min_nfc', type=int, default=128)
