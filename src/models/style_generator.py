@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch.nn.utils import spectral_norm
 
 from src.models.layers import (
-    ConstantInput,    
+    Slices2D,    
     StyledConv2d,
 )
 
@@ -28,8 +28,7 @@ class Synthesis(nn.Module):
     def __init__(self, config):        
         super(Synthesis,self).__init__()        
         channels = config.synthesis_channels        
-        self.input = ConstantInput(config.initial_input_file,
-            config.grid_size, config.initial_input_fixed)
+        self.input = Slices2D(config.initial_input_file, config.grid_full_size)
         self.head = StyledConv2d(3, channels[0], config.style_dim, 3)              
         self.trunk = nn.ModuleList([
             StyledConv2d(in_ch, out_ch, config.style_dim, 3)
@@ -40,8 +39,8 @@ class Synthesis(nn.Module):
             spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),            
             nn.Tanh(),)
 
-    def forward(self, style):
-        x = self.input(style)        
+    def forward(self, style, slice_idx, size):
+        x = self.input(slice_idx, size)
         x = self.head(x, style) 
         for layer in self.trunk:
             x = layer(x, style)        
@@ -54,7 +53,7 @@ class StyleGenerator(nn.Module):
         self.stylist = Stylist(config)
         self.synthesis = Synthesis(config)    
         
-    def forward(self, image):
-        style = self.stylist(image) 
-        points = self.synthesis(style)
+    def forward(self, image, slice_idx, size):
+        style = self.stylist(image)
+        points = self.synthesis(style, slice_idx, size)
         return points

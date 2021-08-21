@@ -74,7 +74,8 @@ def get_parser():
     parser.add_argument('--initial_input_file', default='./data/mean_face_256.pth')
     parser.add_argument('--initial_input_fixed', default=True, type=lambda x: bool(strtobool(x)))
 
-    parser.add_argument('--grid_size', type=int, default=32)
+    parser.add_argument('--grid_full_size', type=int, default=32)
+    parser.add_argument('--grid_slice_size', type=int, default=16)
     parser.add_argument('--style_dim', type=int, default=256)
     parser.add_argument('--synthesis_channels', nargs='+', type=int, 
                         default=[ 256, 256, 256, 256])
@@ -155,7 +156,7 @@ def get_parser():
         default='/home/bobi/Desktop/db/renders')        
     parser.add_argument('--mask_root',
         default='/home/bobi/Desktop/db/ffhq-dataset/masks')
-    parser.add_argument('--fast_batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--fast_image_size', type=int, default=128)
     parser.add_argument('--mask_size', type=int, default=512)    
     parser.add_argument('--fast_image_mean', type=float, default=0.5)

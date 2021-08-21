@@ -9,7 +9,7 @@ class ConstantInput(nn.Module):
     def __init__(self, file, size, fixed):                
         super().__init__()
         t = torch.load(file)
-        t = F.interpolate(t, size=size, mode='bilinear', align_corners=True)
+        t = F.interpolate(t, size=size, mode='bilinear', align_corners=True)        
         self.fixed = fixed
         if fixed:
             self.register_buffer('input', t)
@@ -20,6 +20,19 @@ class ConstantInput(nn.Module):
         if self.fixed:
             return self.input.expand(t.shape[0], -1, -1, -1)
         return self.input.repeat(t.shape[0], 1, 1, 1)
+
+class Slices2D(nn.Module):
+    def __init__(self, file, size):                
+        super().__init__()
+        t = torch.load(file)
+        t = F.interpolate(t, size=size, mode='bilinear', align_corners=True)[0]
+        self.register_buffer('t', t)
+
+    def forward(self, slice_idx, size):
+        res = torch.empty(slice_idx.size(0), 3, size, size, device=slice_idx.device)
+        for i, (r, c) in enumerate(slice_idx):
+            res[i] = self.t[:, r:r+size, c:c+size]
+        return res
 
 class NoiseInjection(nn.Module):
     def __init__(self):

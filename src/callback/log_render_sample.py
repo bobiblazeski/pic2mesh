@@ -21,7 +21,7 @@ class LogRenderSample(pl.callbacks.Callback):
         self.pad_value = opt.log_pad_value        
         self.log_mesh_interval = opt.log_mesh_interval
         self.faces = None
-        
+        self.full_size = opt.grid_full_size
         
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         # show images only every log_batch_interval batches
@@ -33,7 +33,11 @@ class LogRenderSample(pl.callbacks.Callback):
         # generate images
         with torch.no_grad():
             pl_module.eval()
-            vertices = pl_module.G(batch['image'].to(pl_module.device))
+            device = pl_module.device
+            image = batch['image'][0:1].to(device)
+            slice_idx = torch.tensor([[0, 0]]).long().to(device)
+            size = self.full_size
+            vertices = pl_module.G(image, slice_idx, size)
             pl_module.train()
 
             try:            
