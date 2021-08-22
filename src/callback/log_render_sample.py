@@ -23,8 +23,9 @@ class LogRenderSample(pl.callbacks.Callback):
         self.faces = None
         self.full_size = opt.grid_full_size
         
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        # show images only every log_batch_interval batches
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):        
+        if trainer.global_step == 0:  # type: ignore[attr-defined]
+            return
         if (trainer.global_step % self.log_mesh_interval) != 0:  # type: ignore[attr-defined]
             return
         batch = next(iter(trainer.datamodule.train_dataloader()))

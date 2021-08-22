@@ -15,8 +15,7 @@ from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
-from src.utilities.util import (
-    grid_to_list,
+from src.utilities.util import (    
     list_to_grid,
 )
 def pyramid_transform(img_size, mean=0, std=1):
@@ -45,7 +44,8 @@ class SlicedRenderDataset(torch.utils.data.Dataset):
         self.transform = pyramid_transform(self.image_size, 
                                            self.image_mean, self.image_std)
         self.img_ds = ImageFolder(self.image_root, transform=self.transform)
-        self.slice_indices = self.make_indices(self.full_size - self.slice_size)
+        self.slice_indices = self.make_indices(self.full_size - self.slice_size + 1)
+        self.grids =  self.get_all_grids()
         
     def __len__(self):
         return len(self.img_ds) * len(self.slice_indices)
@@ -57,15 +57,18 @@ class SlicedRenderDataset(torch.utils.data.Dataset):
     def scale(self, t, size):
         return F.interpolate(t, size=size, mode='bilinear', align_corners=True)    
     
-    def get_grid(self, idx):
-        f =  self.img_ds.imgs[idx][0]
-        f = f.replace('renders', 'grid').replace('.png', '.pth')
-        grid = list_to_grid(torch.load(f)[None])        
-        grid = self.scale(grid, self.full_size)[0]
-        return grid
+    def get_all_grids(self):        
+        grids = []
+        for (f, _) in self.img_ds.imgs:
+            f = f.replace('renders', 'grid').replace('.png', '.pth')
+            grid = list_to_grid(torch.load(f)[None])
+            grid = self.scale(grid, self.full_size)[0]
+            grids.append(grid)
+        return grids
     
     def get_slice(self, idx):
-        grid = self.get_grid(idx % len(self.img_ds))
+        #grid = self.get_grid(idx % len(self.img_ds))
+        grid = self.grids[idx % len(self.img_ds)]
         indices = self.slice_indices[idx % len(self.slice_indices)]
         r, c = indices
         return (grid[:, r:r+self.slice_size, c:c+self.slice_size],

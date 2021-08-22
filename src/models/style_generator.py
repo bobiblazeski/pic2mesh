@@ -6,7 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import spectral_norm
 
-from src.models.layers import (
+from src.models.layers import ( 
+    ModulatedConv2d, 
     Slices2D,    
     StyledConv2d,
 )
@@ -29,9 +30,9 @@ class Synthesis(nn.Module):
         super(Synthesis,self).__init__()        
         channels = config.synthesis_channels        
         self.input = Slices2D(config.initial_input_file, config.grid_full_size)
-        self.head = StyledConv2d(3, channels[0], config.style_dim, 3)              
+        self.head = ModulatedConv2d(3, channels[0], config.style_dim, 3)              
         self.trunk = nn.ModuleList([
-            StyledConv2d(in_ch, out_ch, config.style_dim, 3)
+            ModulatedConv2d(in_ch, out_ch, config.style_dim, 3)
             for i, (in_ch, out_ch) in
             enumerate(zip(channels, channels[1:]))
         ])
