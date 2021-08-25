@@ -36,7 +36,8 @@ class LogRenderSample(pl.callbacks.Callback):
             pl_module.eval()
             device = pl_module.device
             no_samples = 4
-            image = batch['image'][0:no_samples].to(device)
+            #image = batch['image'][0:no_samples].to(device)
+            image = batch['slice_data'][0:no_samples].to(device)
             slice_idx = torch.tensor([[0, 0]]).expand(no_samples, -1).long().to(device)
             size = self.full_size
             all_vertices, _ = pl_module.G(image, slice_idx, size)

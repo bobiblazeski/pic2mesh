@@ -41,10 +41,12 @@ class Synthesis(nn.Module):
         super(Synthesis,self).__init__()        
         channels = config.synthesis_channels        
         self.input = Slices2D(config.initial_input_file, config.grid_full_size)
-        self.head = ModulatedConv2d(3, channels[0], config.style_dim, 3)              
+        #self.head = ModulatedConv2d(3, channels[0], config.style_dim, 3)
+        self.head = StyledConv2d(3, channels[0], config.style_dim, 3)
         self.trunk = nn.ModuleList([
             #ModulatedConv2d(in_ch, out_ch, config.style_dim, 3)
-            ConvBlock(in_ch, out_ch)
+            StyledConv2d(in_ch, out_ch, config.style_dim, 3)
+            #ConvBlock(in_ch, out_ch)
             for i, (in_ch, out_ch) in
             enumerate(zip(channels, channels[1:]))
         ])
@@ -56,23 +58,12 @@ class Synthesis(nn.Module):
         x = self.input(slice_idx, size)
         x = self.head(x, style) 
         for layer in self.trunk:
-            #x = layer(x, style)        
-            x = layer(x)
+            x = layer(x, style)        
+            #x = layer(x)
         x = self.tail(x)       
         return x
 
-class StyleGenerator(nn.Module):
-    def __init__(self, config):        
-        super(StyleGenerator,self).__init__()
-        self.stylist = Stylist(config)
-        self.synthesis = Synthesis(config)
-        self.decoder = Decoder(config)   
-        
-    def forward(self, image, slice_idx, size):
-        style = self.stylist(image)
-        points = self.synthesis(style, slice_idx, size)
-        reconstruction =  self.decoder(style)
-        return points, reconstruction
+
 
 class UpBlock(nn.Sequential):
     def __init__(self, in_ch, out_ch):
@@ -89,20 +80,36 @@ class Decoder(nn.Module):
         channels = config.stylist_channels.copy()
         #channels.reverse()
         no_layers = len(config.stylist_channels ) - 1
-        self.start_size = int(config.fast_image_size / (2 ** no_layers))
-        self.head = nn.Linear(style_dim, self.start_size ** 2)        
+        #self.start_size = int(config.fast_image_size / (2 ** no_layers))
+        self.start_size = int(config.grid_slice_size / (2 ** no_layers))
+        self.linear = nn.Linear(style_dim, self.start_size ** 2)
+        self.head = ConvBlock(1, channels[0])
         self.trunk = nn.Sequential(*[            
             UpBlock(in_ch, out_ch)
             for i, (in_ch, out_ch) in
             enumerate(zip(channels, channels[1:]))
         ])
         self.tail = nn.Sequential(
-            spectral_norm(nn.Conv2d(channels[-1], 1, 3, 1, 1, bias=False)),            
+            spectral_norm(nn.Conv2d(channels[-1], channels[0], 3, 1, 1, bias=False)),
             nn.Tanh(),)
         
     def forward(self, style):
-        x = self.head(style)        
-        x = x.reshape(style.size(0), 1, self.start_size, self.start_size)        
-        x = self.trunk(x)        
-        x = self.tail(x)        
+        x = self.linear(style)        
+        x = x.reshape(style.size(0), 1, self.start_size, self.start_size)                
+        x = self.head(x)        
+        x = self.trunk(x)                  
+        x = self.tail(x)
         return x
+
+class StyleGenerator(nn.Module):
+    def __init__(self, config):        
+        super(StyleGenerator,self).__init__()
+        self.stylist = Stylist(config)
+        self.synthesis = Synthesis(config)
+        self.decoder = Decoder(config)   
+        
+    def forward(self, image, slice_idx, size):        
+        style = self.stylist(image)                
+        points = self.synthesis(style, slice_idx, size)        
+        reconstruction =  self.decoder(style)
+        return points, reconstruction        
