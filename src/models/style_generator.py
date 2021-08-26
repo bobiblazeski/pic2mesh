@@ -106,10 +106,10 @@ class StyleGenerator(nn.Module):
         super(StyleGenerator,self).__init__()
         self.stylist = Stylist(config)
         self.synthesis = Synthesis(config)
-        self.decoder = Decoder(config)   
+        #self.decoder = Decoder(config)   
         
     def forward(self, image, slice_idx, size):        
         style = self.stylist(image)                
         points = self.synthesis(style, slice_idx, size)        
-        reconstruction =  self.decoder(style)
-        return points, reconstruction        
+        #reconstruction =  self.decoder(style)
+        return points, None#reconstruction        

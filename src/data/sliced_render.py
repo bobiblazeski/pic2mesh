@@ -1,4 +1,5 @@
 # pyright: reportMissingImports=false
+import os
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -57,13 +58,16 @@ class SlicedRenderDataset(torch.utils.data.Dataset):
     def scale(self, t, size):
         return F.interpolate(t, size=size, mode='bilinear', align_corners=True)    
     
-    def get_all_grids(self):        
-        grids = []
-        for (f, _) in self.img_ds.imgs:
+    def get_all_grids(self):
+        file = f'./data/scaled_{self.full_size}.pth'
+        if os.path.exists(file):
+           return torch.load(file)
+        grids = torch.empty(len(self.img_ds.imgs), 3, self.full_size, self.full_size)
+        for i, (f, _) in enumerate(self.img_ds.imgs):
             f = f.replace('renders', 'grid').replace('.png', '.pth')
-            grid = list_to_grid(torch.load(f)[None])
-            grid = self.scale(grid, self.full_size)[0]
-            grids.append(grid)
+            grid = list_to_grid(torch.load(f)[None])            
+            grids[i] = self.scale(grid, self.full_size)[0]
+        torch.save(grids, file)
         return grids
     
     def get_slice(self, idx):
@@ -76,8 +80,8 @@ class SlicedRenderDataset(torch.utils.data.Dataset):
    
     def __getitem__(self, idx):              
         res = {}        
-        image, _ = self.img_ds[idx % len(self.img_ds)]
-        res['image'] =  image        
+        #image, _ = self.img_ds[idx % len(self.img_ds)]
+        #res['image'] =  image        
         slice_data, slice_idx = self.get_slice(idx)
         res['slice_data'] = slice_data
         res['slice_idx'] = slice_idx
