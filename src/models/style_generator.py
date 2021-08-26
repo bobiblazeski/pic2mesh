@@ -1,7 +1,7 @@
 # pyright: reportMissingImports=false
 from collections import OrderedDict
 
-
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils import spectral_norm
@@ -63,6 +63,35 @@ class Synthesis(nn.Module):
         x = self.tail(x)       
         return x
 
+class VariationalSynthesis(nn.Module):
+    def __init__(self, config):        
+        super(VariationalSynthesis, self).__init__()        
+        channels = config.synthesis_channels        
+        self.input = Slices2D(config.initial_input_file, config.grid_full_size)
+        #self.head = ModulatedConv2d(3, channels[0], config.style_dim, 3)
+        self.head = StyledConv2d(3, channels[0], config.style_dim, 3)
+        self.trunk = nn.ModuleList([
+            #ModulatedConv2d(in_ch, out_ch, config.style_dim, 3)
+            StyledConv2d(in_ch, out_ch, config.style_dim, 3)
+            #ConvBlock(in_ch, out_ch)
+            for i, (in_ch, out_ch) in
+            enumerate(zip(channels, channels[1:]))
+        ])
+        self.tail = nn.Sequential(
+            spectral_norm(nn.Conv2d(channels[-1], 3, 3, 1, 1, bias=False)),            
+            nn.Tanh(),)
+        self.linear = nn.Linear(config.style_dim, config.style_dim)
+
+    def forward(self, style, slice_idx, size):
+        style = F.relu(self.linear(style))
+        
+        x = self.input(slice_idx, size)
+        x = self.head(x, style) 
+        for layer in self.trunk:
+            x = layer(x, style)        
+            #x = layer(x)
+        x = self.tail(x)       
+        return x
 
 
 class UpBlock(nn.Sequential):
@@ -110,6 +139,6 @@ class StyleGenerator(nn.Module):
         
     def forward(self, image, slice_idx, size):        
         style = self.stylist(image)                
-        points = self.synthesis(style, slice_idx, size)        
+        points = self.synthesis(style, slice_idx, size)
         #reconstruction =  self.decoder(style)
-        return points, None#reconstruction        
+        return points, None#reconstruction
