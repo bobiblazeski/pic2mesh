@@ -95,4 +95,22 @@ def mean_distance(pts):
               [+0., +0.]]
     v_dist = get_distance(pts, v_hood)
     h_dist = get_distance(pts, h_hood)
-    return (v_dist + h_dist) / 2    
+    return (v_dist + h_dist) / 2
+
+def mean_2d_3ch(n):
+    assert n % 2 == 1 
+    weight = n ** -2    
+    hood =  (torch.zeros(n, n) + weight).tolist()    
+    zeros = torch.zeros(n, n).tolist()
+    weights = torch.tensor([
+        [hood, zeros, zeros],
+        [zeros, hood, zeros],
+        [zeros, zeros, hood],
+    ])
+    padding = int((n-1) / 2.)
+    res = nn.Conv2d(3, 3, n, stride=1, padding=padding,
+            bias=False, padding_mode='replicate')
+    res.requires_grad_(False)
+    res.weight.data = weights
+    return res
+         
