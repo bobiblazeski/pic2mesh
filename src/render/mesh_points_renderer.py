@@ -29,9 +29,7 @@ class MeshPointsRenderer(torch.nn.Module):
         self.viewpoint_elevation = opt.viewpoint_elevation, 
         self.viewpoint_azimuth = opt.viewpoint_azimuth
 
-        self.max_brightness = opt.raster_max_brightness        
-        size = opt.fast_baseline_size
-        self.register_buffer('faces',  torch.tensor(make_faces(size, size))[None])
+        self.max_brightness = opt.raster_max_brightness                
         self.renderer = None
     
     def setup(self, device):                    
@@ -70,14 +68,12 @@ class MeshPointsRenderer(torch.nn.Module):
             shader=shader,
         )
     
-    def __call__(self, points, colors, mean=None, std=None, grayscale=True):
+    def __call__(self, points, faces, colors=None, mean=None, std=None, grayscale=True):
         assert len(points.shape) == 4 and points.shape[1] == 3
-        
-        points, colors = grid_to_list(points), grid_to_list(colors)
-        bs, device = points.size(0), points.device
+        colors = colors or torch.ones_like(points)
+        points, colors = grid_to_list(points), grid_to_list(colors)        
         if  self.renderer is None:
-            self.setup(device)
-        faces = self.faces.expand(bs, -1, -1)                
+            self.setup(points.device)        
         textures = TexturesVertex(verts_features=colors)
 
         mesh = Meshes(verts=points, faces=faces, textures=textures)

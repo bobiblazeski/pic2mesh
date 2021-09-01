@@ -94,8 +94,7 @@ class VertexNormals(torch.nn.Module):
             self.vert_tri_indices.flatten()).reshape(bs, r, c, 3)
         
         fa_group = face_areas.index_select(1, 
-            self.vert_tri_indices.flatten()).reshape(bs, r, c, 1)
-        weighted_fa_group = fa_group * self.vert_tri_weights        
+            self.vert_tri_indices.flatten()).reshape(bs, r, c, 1)             
         
         weighted_fn_group = fn_group * fa_group   
         vertex_normals = weighted_fn_group.sum(dim=-2)
