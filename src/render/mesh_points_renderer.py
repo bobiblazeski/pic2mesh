@@ -70,7 +70,7 @@ class MeshPointsRenderer(torch.nn.Module):
     
     def __call__(self, points, faces, colors=None, mean=None, std=None, grayscale=True):
         assert len(points.shape) == 4 and points.shape[1] == 3
-        colors = colors or torch.ones_like(points)
+        colors = colors if colors is not None else torch.ones_like(points)
         points, colors = grid_to_list(points), grid_to_list(colors)        
         if  self.renderer is None:
             self.setup(points.device)        
